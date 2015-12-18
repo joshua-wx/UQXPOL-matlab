@@ -1,7 +1,9 @@
 function data_struct=read_wr2100binary(binary_ffn)
+%Joshua Soderholm, December 2015
+%Climate Research Group, University of Queensland
 
 %WHAT: reads both v2 and v3 files using the version specification in the
-%header
+%header. passes reading onto correct script
 
 % Open file and read file version
 fid         = fopen(binary_ffn);

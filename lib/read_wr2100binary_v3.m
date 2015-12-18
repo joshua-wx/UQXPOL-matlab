@@ -1,6 +1,8 @@
 function data_struct=read_wr2100binary_v3(binary_ffn)
+%Joshua Soderholm, December 2015
+%Climate Research Group, University of Queensland
 
-%v3: updated Nov 2015 to read new header information regarding utc time and
+%WHAT: v3 updated Nov 2015 to read new header information regarding utc time and
 %pulse specifications and QC data field. All files collected from 9/11/2015 onwards will
 %require this reader. All files before this date use version 2
 
@@ -109,43 +111,43 @@ for j=1:num_smpls
     
     %Rain Rate (mm/h)
     ray_rain = fread(fid, num_gates, 'ushort');
-    ray_rain(ray_rain==0) = NaN;
-    ray_rain = (ray_rain-32768)./100;
+%     ray_rain(ray_rain==0) = NaN;
+%     ray_rain = (ray_rain-32768)./100;
     
     %Horz Refl (dBZ)
     ray_zhh = fread(fid, num_gates, 'ushort');
-    ray_zhh(ray_zhh==0) = NaN;
-    ray_zhh = (ray_zhh-32768)./100;
+%     ray_zhh(ray_zhh==0) = NaN;
+%     ray_zhh = (ray_zhh-32768)./100;
     
     %Doppler Velocity (m/s)
     ray_vel = fread(fid, num_gates, 'ushort');
-    ray_vel(ray_vel==0) = NaN;
-    ray_vel = (ray_vel-32768)./100;
+%     ray_vel(ray_vel==0) = NaN;
+%     ray_vel = (ray_vel-32768)./100;
     
     %Refl ratio (dB)
     ray_zdr = fread(fid, num_gates, 'ushort');
-    ray_zdr(ray_zdr==0) = NaN;
-    ray_zdr = (ray_zdr-32768)./100;
+%     ray_zdr(ray_zdr==0) = NaN;
+%     ray_zdr = (ray_zdr-32768)./100;
     
     %Propagation phase difference rate of change (deg/km) (kpd)
     ray_kdp = fread(fid, num_gates, 'ushort');
-    ray_kdp(ray_kdp==0) = NaN;
-    ray_kdp = (ray_kdp-32768)./100;
+%     ray_kdp(ray_kdp==0) = NaN;
+%     ray_kdp = (ray_kdp-32768)./100;
     
     %Differential Phase Shift (deg) (phidp)
     ray_phidp = fread(fid, num_gates, 'ushort');
-    ray_phidp(ray_phidp==0) = NaN;
-    ray_phidp = 360.*(ray_phidp-1)./65535;
+%     ray_phidp(ray_phidp==0) = NaN;
+%     ray_phidp = 360.*(ray_phidp-1)./65535;
     
     %Correlation coefficient (rhohv)
     ray_rhohv = fread(fid, num_gates, 'ushort');
-    ray_rhohv(ray_rhohv==0) = NaN;
-    ray_rhohv = 2.*(ray_rhohv-1)./65534;
+%     ray_rhohv(ray_rhohv==0) = NaN;
+%     ray_rhohv = 2.*(ray_rhohv-1)./65534;
     
     %Doppler Spectral Width (m/s)
     ray_specwidth = fread(fid, num_gates, 'ushort');
-    ray_specwidth(ray_specwidth==0) = NaN;
-    ray_specwidth = (ray_specwidth-1)./100;
+%     ray_specwidth(ray_specwidth==0) = NaN;
+%     ray_specwidth = (ray_specwidth-1)./100;
     
     %QC
     ray_qc = fread(fid, num_gates, 'ushort');

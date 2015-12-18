@@ -33,11 +33,11 @@ function write_hdf_header(h5_fn,header_struct)
 %set object type
 scan_type = header_struct.scan_type;
 if strcmp(scan_type,'scn')
-    scan_object = 'SCAN'; %SCAN
+    scan_object = 'PVOL'; %SCAN
 elseif strcmp(scan_type,'rhi')
     scan_object = 'ELEV';
 elseif strcmp(scan_type,'sppi')
-    scan_object = 'SCAN'; %SCAN
+    scan_object = 'PVOL'; %SCAN
 end
 
 %create new file
@@ -77,18 +77,18 @@ H5Acreatedouble(group_id, 'TXpower', 0.1); %kW: Does not change
 %close file
 H5F.close(file_id);
 
-function write_hdf_v2(h5_fn,data_struct)
+function write_hdf_v2(h5_fn,data_struct,endtime_offset)
 
 %set scan type
 scan_type = data_struct.header.scan_type;
 if strcmp(scan_type,'scn')
-    scan_product = 'SCAN'; %SCAN
+    scan_product = 'PVOL'; %SCAN
     scan_param   = 'PPI';
 elseif strcmp(scan_type,'rhi')
     scan_product = 'RHI';
     scan_param   = 'RHI';
 elseif strcmp(scan_type,'sppi')
-    scan_product = 'SCAN'; %SCAN
+    scan_product = 'PVOL'; %SCAN
     scan_param   = 'PPI';
 end
 
@@ -123,7 +123,7 @@ if strcmp(scan_type,'scn') || strcmp(scan_type,'sppi') %scn and sppi where group
     
     elangle = data_struct.data.scan_elv(1);
     nbins   = length(data_struct.data.scan_rng);
-    rstart  = data_struct.data.scan_rng(1)/1000;
+    rstart  = data_struct.data.scan_rng(1);
     rscale  = data_struct.data.scan_rng(2)-data_struct.data.scan_rng(1);
     nrays   = length(data_struct.data.scan_elv);
    
@@ -145,7 +145,7 @@ else %RHI where group
     
     az_angle = data_struct.data.scan_azi(1);
     angles   = data_struct.data.scan_elv;
-    range    =  data_struct.data.scan_rng(end)/1000;
+    range    =  data_struct.data.scan_rng(end);
     
     H5Acreatedouble(group_id, 'lat', data_struct.header.lat_dec);
     H5Acreatedouble(group_id, 'lon', data_struct.header.lon_dec);
@@ -179,11 +179,11 @@ create_data(5,sort_ind,group_id,data_struct.data.scan_kdp,'KDP',.01,-327.68);
 %PHIDP
 create_data(6,sort_ind,group_id,data_struct.data.scan_phidp,'PHIDP',360/65535,-360/65535);
 %RHOHV
-create_data(7,sort_ind,group_id,data_struct.data.scan_rhohv,'RHOHV',2/65534,-2/65534);
+create_data(7,sort_ind,group_id,data_struct.data.scan_rhohv,'RHOHV',-100,-100);
 %WRAD
-create_data(8,sort_ind,group_id,data_struct.data.scan_specwidth,'WRADH',-.01,-.01);
+create_data(8,sort_ind,group_id,data_struct.data.scan_specwidth,'WRADH',-100,-100);
 %QC
-create_data(9,sort_ind,group_id,data_struct.data.scan_qc,'WR2100_QC',0,0);
+create_data(9,sort_ind,group_id,data_struct.data.scan_qc,'WR2100_QC',-100,-100);
 
 H5F.close(file_id);
 
@@ -226,7 +226,7 @@ function create_data(index,sort_ind,group_id,data,quantity,gain,offset)
 data = data(sort_ind,:);
 
 %rotate CHECK THIS!!!
-data = flipud(rot90(data));
+data = rot90(data);
 
 %set compression
 chunk_size   = [45 80];
@@ -236,7 +236,13 @@ deflate_scal = 6;
 data_no = ['data',num2str(index)];
 data_id = H5G.create(group_id, data_no, 0, 0, 0);
 
-data_set = uint16(data);
+data_set = int16(data);
+
+%warn for compression
+if max(data(:))>int16(inf)
+    display('data value larger than int16')
+    return
+end
 
 %data what group
 g_id = H5G.create(data_id, 'what', 0, 0, 0);
@@ -257,10 +263,10 @@ H5P.set_chunk(plist, chunk_size);
 H5P.set_deflate(plist, deflate_scal);
 
 %create data variable
-dataset_id = H5D.create(data_id, 'data','H5T_STD_U16LE',dataspace_id, 'H5P_DEFAULT', plist, 'H5P_DEFAULT');
+dataset_id = H5D.create(data_id, 'data','H5T_STD_I16LE',dataspace_id, 'H5P_DEFAULT', plist, 'H5P_DEFAULT');
 
 %write data variable
-H5D.write(dataset_id, 'H5T_STD_U16LE', 'H5S_ALL', 'H5S_ALL', 'H5P_DEFAULT', data_set);
+H5D.write(dataset_id, 'H5T_STD_I16LE', 'H5S_ALL', 'H5S_ALL', 'H5P_DEFAULT', data_set);
 
 %write data root group
 H5Acreatestring(dataset_id, 'CLASS', 'IMAGE');

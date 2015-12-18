@@ -54,6 +54,9 @@ radar_vert_constant       = const_vert_mantissa * 10^const_vert_characteristic;
 %calc utc time
 rec_utc_datetime = addtodate(file_datetime,v2_utc_offset,'hour');
 
+%unknown pulse spec in v2 files
+tx_pulse_spec = 0;
+
 azi_offset = fread(fid, 1, 'ushort')/100; %degTn
 
 %extract filename parts
@@ -101,43 +104,43 @@ for j=1:num_smpls
     
     %Rain Rate (mm/h)
     ray_rain = fread(fid, num_gates, 'ushort');
-    ray_rain(ray_rain==0) = NaN;
-    ray_rain = (ray_rain-32768)./100;
+%     ray_rain(ray_rain==0) = NaN;
+%     ray_rain = (ray_rain-32768)./100;
     
     %Horz Refl (dBZ)
     ray_zhh = fread(fid, num_gates, 'ushort');
-    ray_zhh(ray_zhh==0) = NaN;
-    ray_zhh = (ray_zhh-32768)./100;
+%     ray_zhh(ray_zhh==0) = NaN;
+%     ray_zhh = (ray_zhh-32768)./100;
     
     %Doppler Velocity (m/s)
     ray_vel = fread(fid, num_gates, 'ushort');
-    ray_vel(ray_vel==0) = NaN;
-    ray_vel = (ray_vel-32768)./100;
+%     ray_vel(ray_vel==0) = NaN;
+%     ray_vel = (ray_vel-32768)./100;
     
     %Refl ratio (dB)
     ray_zdr = fread(fid, num_gates, 'ushort');
-    ray_zdr(ray_zdr==0) = NaN;
-    ray_zdr = (ray_zdr-32768)./100;
+%     ray_zdr(ray_zdr==0) = NaN;
+%     ray_zdr = (ray_zdr-32768)./100;
     
     %Propagation phase difference rate of change (deg/km) (kpd)
     ray_kdp = fread(fid, num_gates, 'ushort');
-    ray_kdp(ray_kdp==0) = NaN;
-    ray_kdp = (ray_kdp-32768)./100;
+%     ray_kdp(ray_kdp==0) = NaN;
+%     ray_kdp = (ray_kdp-32768)./100;
     
     %Differential Phase Shift (deg) (phidp)
     ray_phidp = fread(fid, num_gates, 'ushort');
-    ray_phidp(ray_phidp==0) = NaN;
-    ray_phidp = 360.*(ray_phidp-1)./65535;
+%     ray_phidp(ray_phidp==0) = NaN;
+%     ray_phidp = 360.*(ray_phidp-1)./65535;
     
     %Correlation coefficient (rhohv)
     ray_rhohv = fread(fid, num_gates, 'ushort');
-    ray_rhohv(ray_rhohv==0) = NaN;
-    ray_rhohv = 2.*(ray_rhohv-1)./65534;
+%     ray_rhohv(ray_rhohv==0) = NaN;
+%     ray_rhohv = 2.*(ray_rhohv-1)./65534;
     
     %Doppler Spectral Width (m/s)
     ray_specwidth = fread(fid, num_gates, 'ushort');
-    ray_specwidth(ray_specwidth==0) = NaN;
-    ray_specwidth = (ray_specwidth-1)./100;
+%     ray_specwidth(ray_specwidth==0) = NaN;
+%     ray_specwidth = (ray_specwidth-1)./100;
     
     %allocate
     scan_id(j)          = info_id;
@@ -152,9 +155,6 @@ for j=1:num_smpls
     scan_phidp(j,:)     = ray_phidp;
     scan_rhohv(j,:)     = ray_rhohv;
     scan_specwidth(j,:) = ray_specwidth;
-    
-    %unknown pulse spec in v2 files
-    tx_pulse_spec = 0;
     
 end
 fclose(fid);

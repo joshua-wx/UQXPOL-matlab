@@ -1,4 +1,7 @@
 function wr2100binary_to_odimh5(config_input_path)
+%Joshua Soderholm, December 2015
+%Climate Research Group, University of Queensland
+
 %WHAT: master script for processing wr2100 binary files to odimh5
 
 %testing config file
@@ -42,6 +45,7 @@ end
     
 %create stop file for realtime processing (delete this stop file to halt
 %loop)
+delete(kill_path)
 if realtime_processing == 1
     [~,~] = system(['touch ',kill_path]);
 end
@@ -61,6 +65,7 @@ while true
         pause(1)
     end
     
+    %conversion loop
     for i=1:length(fileList)
         display(['converting file ',fileList{i}])
         %push file to wr2100binary reader
@@ -69,16 +74,16 @@ while true
         write_odimh5(data_struct,output_path)
     end
     
-    %append fileList to temp archive
-    if ~isempty(fileList)
-        fileList_archive = [fileList_archive;fileList];
-        save(fileList_path,'fileList_archive');
-    end
-    
     %break while loop is kill file is not present
     if exist(kill_path,'file')~=2
         display('***processing killed***')
         break
+    end
+    
+    %append fileList to temp archive
+    if ~isempty(fileList)
+        fileList_archive = [fileList_archive;fileList];
+        save(fileList_path,'fileList_archive');
     end
     
     display([num2str(length(fileList)),' new files converted. ',num2str(length(fileList_archive)),' total files converted.',10])

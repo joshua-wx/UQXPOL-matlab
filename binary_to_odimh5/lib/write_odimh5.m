@@ -33,11 +33,11 @@ function write_hdf_header(h5_fn,header_struct)
 %set object type
 scan_type = header_struct.scan_type;
 if strcmp(scan_type,'scn')
-    scan_object = 'SCAN'; %SCAN
+    scan_object = 'PVOL'; %SCAN
 elseif strcmp(scan_type,'rhi')
     scan_object = 'ELEV';
 elseif strcmp(scan_type,'sppi')
-    scan_object = 'SCAN'; %SCAN
+    scan_object = 'PVOL'; %SCAN
 end
 
 %create new file
@@ -82,13 +82,13 @@ function write_hdf_v2(h5_fn,data_struct)
 %set scan type
 scan_type = data_struct.header.scan_type;
 if strcmp(scan_type,'scn')
-    scan_product = 'SCAN'; %SCAN
+    scan_product = 'PVOL'; %SCAN
     scan_param   = 'PPI';
 elseif strcmp(scan_type,'rhi')
     scan_product = 'RHI';
     scan_param   = 'RHI';
 elseif strcmp(scan_type,'sppi')
-    scan_product = 'SCAN'; %SCAN
+    scan_product = 'PVOL'; %SCAN
     scan_param   = 'PPI';
 end
 

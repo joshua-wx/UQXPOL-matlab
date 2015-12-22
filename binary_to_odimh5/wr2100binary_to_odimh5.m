@@ -45,7 +45,9 @@ end
     
 %create stop file for realtime processing (delete this stop file to halt
 %loop)
-delete(kill_path)
+if exist(kill_path,'file') == 2
+    delete(kill_path)
+end
 if realtime_processing == 1
     [~,~] = system(['touch ',kill_path]);
 end

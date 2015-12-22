@@ -232,6 +232,14 @@ data = flipud(rot90(data));
 chunk_size   = [45 80];
 deflate_scal = 6;
 
+%shink compression chunk size if needed (using C dims)
+if size(data,2)<chunk_size(1)
+    chunk_size(1) = size(data,2);
+end
+if size(data,1)<chunk_size(2)
+    chunk_size(2) = size(data,1);
+end
+
 %create data entry variables
 data_no = ['data',num2str(index)];
 data_id = H5G.create(group_id, data_no, 0, 0, 0);

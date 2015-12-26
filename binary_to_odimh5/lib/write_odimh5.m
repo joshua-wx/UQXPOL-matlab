@@ -9,7 +9,7 @@ temp_config_mat   = 'etc/current_config.mat';
 load(temp_config_mat);
 
 %create h5 ffn
-scan_date = datestr(data_struct.header.file_datetime,'yyyymmdd_HHMMSS');
+scan_date = datestr(data_struct.header.rec_utc_datetime,'yyyymmdd_HHMMSS');
 scan_type = data_struct.header.scan_type;
 if strcmp(scan_type,'scn') %append ppi numbers to scn filename
     scan_type = [scan_type,'_',num2str(data_struct.header.scn_ppi_total,'%02.0f'),'_',num2str(data_struct.header.scn_ppi_step,'%02.0f')];
@@ -49,8 +49,8 @@ H5Acreatestring(root_id, 'Conventions', 'ODIM_H5/V2_0');
 
 %what root group
 group_id = H5G.create(root_id, 'what', 0, 0, 0);
-H5Acreatestring(group_id, 'date', datestr(header_struct.file_datetime,'yyyymmdd'));
-H5Acreatestring(group_id, 'time', datestr(header_struct.file_datetime,'HHMMSS'));
+H5Acreatestring(group_id, 'date', datestr(header_struct.rec_utc_datetime,'yyyymmdd'));
+H5Acreatestring(group_id, 'time', datestr(header_struct.rec_utc_datetime,'HHMMSS'));
 H5Acreatestring(group_id, 'object', scan_object);
 H5Acreatestring(group_id, 'source', 'RAD:AU99,PLC:WOK');
 H5Acreatestring(group_id, 'version', 'H5rad 2.2');
@@ -59,7 +59,7 @@ H5Acreatestring(group_id, 'version', 'H5rad 2.2');
 group_id = H5G.create(root_id, 'where', 0, 0, 0);
 H5Acreatedouble(group_id, 'lat', header_struct.lat_dec);
 H5Acreatedouble(group_id, 'lon', header_struct.lon_dec);
-H5Acreatedouble(group_id, 'height', header_struct.ant_alt_up*10000+header_struct.ant_alt_low);
+H5Acreatedouble(group_id, 'height', header_struct.ant_alt);
 
 %how root group
 group_id = H5G.create(root_id, 'how', 0, 0, 0);
@@ -126,21 +126,22 @@ g_id     = H5G.create(group_id, 'what', 0, 0, 0);
 
 H5Acreatestring(g_id, 'product', scan_product);
 H5Acreatestring(g_id, 'prodpar', scan_param);
-H5Acreatestring(g_id, 'startdate', datestr(data_struct.header.file_datetime,'yyyymmdd'));
-H5Acreatestring(g_id, 'starttime', datestr(data_struct.header.file_datetime,'HHMMSS'));
-H5Acreatestring(g_id, 'enddate', datestr(data_struct.header.file_datetime,'yyyymmdd'));
-H5Acreatestring(g_id, 'endtime', datestr(data_struct.header.file_datetime,'HHMMSS'));
+H5Acreatestring(g_id, 'startdate', datestr(data_struct.header.rec_utc_datetime,'yyyymmdd'));
+H5Acreatestring(g_id, 'starttime', datestr(data_struct.header.rec_utc_datetime,'HHMMSS'));
+H5Acreatestring(g_id, 'enddate', datestr(data_struct.header.rec_utc_datetime,'yyyymmdd'));
+H5Acreatestring(g_id, 'endtime', datestr(data_struct.header.rec_utc_datetime,'HHMMSS'));
 
 %where dataset group
 g_id     = H5G.create(group_id, 'where', 0, 0, 0);
 
+nbins   = data_struct.header.num_gates;
+rscale  = data_struct.header.gate_res;
+
 if strcmp(scan_type,'scn') || strcmp(scan_type,'sppi') %scn and sppi where group
     
-    elangle = data_struct.data.scan_elv(1);
-    nbins   = length(data_struct.data.scan_rng);
-    rstart  = data_struct.data.scan_rng(1)/1000;
-    rscale  = data_struct.data.scan_rng(2)-data_struct.data.scan_rng(1);
-    nrays   = length(data_struct.data.scan_elv);
+    elangle = data_struct.data3.data(1); %elv
+    rstart  = 0;
+    nrays   = data_struct.header.num_smpls;
    
     H5Acreatedouble(g_id, 'elangle', elangle);
     H5Acreatelong(g_id, 'nbins', int64(nbins));
@@ -150,17 +151,17 @@ if strcmp(scan_type,'scn') || strcmp(scan_type,'sppi') %scn and sppi where group
     H5Acreatelong(g_id, 'a1gate', int64(0)); %just use 0 as 1st azimuth radiated in the scan
     if strcmp(scan_type,'sppi') %additional SPPI information
         
-        startaz = data_struct.data.scan_azi(1);
-        stopaz  = data_struct.data.scan_azi(end);
+        startaz = data_struct.data2.data(1);
+        stopaz  = data_struct.data2.data(end);
         
         H5Acreatedouble(g_id, 'startaz', startaz);
         H5Acreatedouble(g_id, 'stopaz', stopaz);
     end
 else %RHI where group
     
-    az_angle = data_struct.data.scan_azi(1);
-    angles   = data_struct.data.scan_elv;
-    range    =  data_struct.data.scan_rng(end)/1000;
+    az_angle = data_struct.data2.data(1); %azi
+    angles   = data_struct.data3.data; %elv
+    range    = (nbins-1)*rscale/1000;
     
     H5Acreatedouble(group_id, 'lat', data_struct.header.lat_dec);
     H5Acreatedouble(group_id, 'lon', data_struct.header.lon_dec);
@@ -174,31 +175,19 @@ g_id      = H5G.create(group_id, 'how', 0, 0, 0);
 
 %% data group
 
-%sort index for scn scans for odhimh5 compliant
+%sort azi index for scn scans for odhimh5 compliant
 if strcmp(scan_type,'scn')
-    [~,sort_ind] = sort(data_struct.data.scan_azi);
+    [~,sort_ind] = sort(data_struct.data2.data); %azi
 else
-    sort_ind = 1:length(data_struct.data.scan_azi);
+    sort_ind = 1:length(data_struct.data2.data); %azi
 end
 
-%RAIN
-create_data(1,sort_ind,group_id,data_struct.data.scan_rain,'RATE',.01,-327.68);
-%DBZH
-create_data(2,sort_ind,group_id,data_struct.data.scan_zhh,'DBZH',.01,-327.68);
-%VRAD
-create_data(3,sort_ind,group_id,data_struct.data.scan_vel,'VRADH',.01,-327.68);
-%ZRD
-create_data(4,sort_ind,group_id,data_struct.data.scan_zdr,'ZDR',.01,-327.68);
-%KDP
-create_data(5,sort_ind,group_id,data_struct.data.scan_kdp,'KDP',.01,-327.68);
-%PHIDP
-create_data(6,sort_ind,group_id,data_struct.data.scan_phidp,'PHIDP',360/65535,-360/65535);
-%RHOHV
-create_data(7,sort_ind,group_id,data_struct.data.scan_rhohv,'RHOHV',2/65534,-2/65534);
-%WRAD
-create_data(8,sort_ind,group_id,data_struct.data.scan_specwidth,'WRADH',-.01,-.01);
-%QC
-create_data(9,sort_ind,group_id,data_struct.data.scan_qc,'WR2100_QC',0,0);
+%write data
+for i=1:length(fields(data_struct))-1 %loop through all data sets (1 less for header)
+    data_index_name = ['data',num2str(i)];
+    dataset         = data_struct.(data_index_name);
+    create_data(i,sort_ind,group_id,dataset);
+end
 
 H5F.close(file_id);
 
@@ -235,10 +224,10 @@ attr_id  = H5A.create(root_id, a_name, 'H5T_STD_I64LE', space_id, 'H5P_DEFAULT',
 H5A.write(attr_id, 'H5T_NATIVE_LONG', a_val);
       
 
-function create_data(index,sort_ind,group_id,data,quantity,gain,offset)
+function create_data(index,sort_ind,group_id,dataset)
 
 %sort data (polar compliant)
-data = data(sort_ind,:);
+data = dataset.data(sort_ind,:);
 
 %rotate CHECK THIS!!!
 data = flipud(rot90(data));
@@ -263,9 +252,9 @@ data_set = uint16(data);
 
 %data what group
 g_id = H5G.create(data_id, 'what', 0, 0, 0);
-H5Acreatestring(g_id, 'quantity',quantity);
-H5Acreatedouble(g_id, 'gain', gain); %float
-H5Acreatedouble(g_id, 'offset', offset); %float
+H5Acreatestring(g_id, 'quantity',dataset.quantity);
+H5Acreatedouble(g_id, 'gain', dataset.gain); %float
+H5Acreatedouble(g_id, 'offset', dataset.offset); %float
 H5Acreatedouble(g_id, 'nodata', 0.0);
 H5Acreatedouble(g_id, 'undetect', 0.1);
 

@@ -9,16 +9,16 @@ temp_config_mat   = 'etc/current_config.mat';
 load(temp_config_mat);
 
 %Read Header (apply scaling)
-header_size = fread(fid, 1, 'ushort');
+header_size = fread(fid, 1, 'ushort'); %NOT SAVED
 file_vrsion = fread(fid, 1, 'ushort');
 
-file_year   = fread(fid, 1, 'ushort');
-file_month  = fread(fid, 1, 'ushort');
-file_day    = fread(fid, 1, 'ushort');
-file_hour   = fread(fid, 1, 'ushort');
-file_min    = fread(fid, 1, 'ushort');
-file_sec    = fread(fid, 1, 'ushort');
-file_datetime = datenum([file_year,file_month,file_day,file_hour,file_min,file_sec]);
+file_year   = fread(fid, 1, 'ushort'); %NOT SAVED
+file_month  = fread(fid, 1, 'ushort'); %NOT SAVED
+file_day    = fread(fid, 1, 'ushort'); %NOT SAVED
+file_hour   = fread(fid, 1, 'ushort'); %NOT SAVED
+file_min    = fread(fid, 1, 'ushort'); %NOT SAVED
+file_sec    = fread(fid, 1, 'ushort'); %NOT SAVED
+file_datetime = datenum([file_year,file_month,file_day,file_hour,file_min,file_sec]); %NOT SAVED
 
 lat_deg     = fread(fid, 1, 'short');
 lat_min     = fread(fid, 1, 'ushort');
@@ -29,9 +29,11 @@ lon_deg     = fread(fid, 1, 'short');
 lon_min     = fread(fid, 1, 'ushort');
 lon_sec     = fread(fid, 1, 'ushort')/1000;
 lon_dec     = dms2degrees([lon_deg,lon_min,lon_sec]);
+ 
+ant_alt_up  = fread(fid, 1, 'ushort');       %cm %NOT SAVED
+ant_alt_low = fread(fid, 1, 'ushort');       %cm %NOT SAVED
+ant_alt     = ant_alt_up*10000+ant_alt_low;  %m
 
-ant_alt_up  = fread(fid, 1, 'ushort');       %cm
-ant_alt_low = fread(fid, 1, 'ushort');       %cm
 ant_rot_spd = fread(fid, 1, 'ushort')/10;    %rpm
 prf1        = fread(fid, 1, 'ushort')/10;    %Hz
 prf2        = fread(fid, 1, 'ushort')/10;    %Hz
@@ -44,12 +46,12 @@ gate_res    = fread(fid, 1, 'ushort')/100;   %m
 %create rng_vec from parameters
 scan_rng   = gate_res:gate_res:num_gates*gate_res;
 
-const_horz_mantissa = fread(fid, 1, 'long');
-const_horz_characteristic = fread(fid, 1, 'short');
-radar_horz_constant       = const_horz_mantissa * 10^const_horz_characteristic;
-const_vert_mantissa = fread(fid, 1, 'long');
-const_vert_characteristic = fread(fid, 1, 'short');
-radar_vert_constant       = const_vert_mantissa * 10^const_vert_characteristic;
+const_horz_mantissa         = fread(fid, 1, 'long'); %NOT SAVED
+const_horz_characteristic   = fread(fid, 1, 'short'); %NOT SAVED
+radar_horz_constant         = const_horz_mantissa * 10^const_horz_characteristic;
+const_vert_mantissa         = fread(fid, 1, 'long'); %NOT SAVED
+const_vert_characteristic   = fread(fid, 1, 'short'); %NOT SAVED
+radar_vert_constant         = const_vert_mantissa * 10^const_vert_characteristic;
 
 %calc utc time
 rec_utc_datetime = addtodate(file_datetime,v2_utc_offset,'hour');
@@ -78,19 +80,18 @@ empty_vec = zeros(num_smpls,1);
 empty_mat = zeros(num_smpls,num_gates);
 
 %preallocate
-scan_id         = empty_vec;
-scan_azi        = empty_vec;
-scan_bytes      = empty_vec;
-scan_elv        = empty_vec;
-scan_rain       = empty_mat;
-scan_zhh        = empty_mat;
-scan_vel        = empty_mat;
-scan_zdr        = empty_mat;
-scan_kdp        = empty_mat;
-scan_phidp      = empty_mat;
-scan_rhohv      = empty_mat;
-scan_specwidth  = empty_mat;
-scan_qc         = empty_mat;
+data_struct.data1  = struct('data',empty_vec,'quantity','FURUNO_ID','offset',0,'gain',0);
+data_struct.data2  = struct('data',empty_vec,'quantity','FURUNO_AZI','offset',0,'gain',0);
+data_struct.data3  = struct('data',empty_vec,'quantity','FURUNO_ELV','offset',0,'gain',0);
+data_struct.data4  = struct('data',empty_mat,'quantity','RATE','offset',-327.68,'gain',.01);
+data_struct.data5  = struct('data',empty_mat,'quantity','DBZH','offset',-327.68,'gain',.01);
+data_struct.data6  = struct('data',empty_mat,'quantity','VRADH','offset',-327.68,'gain',.01);
+data_struct.data7  = struct('data',empty_mat,'quantity','ZDR','offset',-327.68,'gain',.01);
+data_struct.data8  = struct('data',empty_mat,'quantity','KDP','offset',-327.68,'gain',.01);
+data_struct.data9  = struct('data',empty_mat,'quantity','PHIDP','offset',360/65535,'gain',-360/65535);
+data_struct.data10 = struct('data',empty_mat,'quantity','RHOHV','offset',-2/65534,'gain',2/65534);
+data_struct.data11 = struct('data',empty_mat,'quantity','WRADH','offset',-.01,'gain',-.01);
+data_struct.data12 = struct('data',empty_mat,'quantity','FURUNO_QC','offset',0,'gain',0);
 
 %begin data read loop
 for j=1:num_smpls
@@ -102,7 +103,7 @@ for j=1:num_smpls
     %Read ray data
     
     %number of bytes in ray
-    ray_bytes = fread(fid, 1, 'ushort');
+    ray_bytes = fread(fid, 1, 'ushort'); %NOT SAVED
     
     %Rain Rate (mm/h)
     ray_rain = fread(fid, num_gates, 'ushort');
@@ -145,35 +146,29 @@ for j=1:num_smpls
 %     ray_specwidth = (ray_specwidth-1)./100;
     
     %allocate
-    scan_id(j)          = info_id;
-    scan_azi(j)         = ray_azi;
-    scan_elv(j)         = ray_elv;
-    scan_bytes(j)       = ray_bytes;
-    scan_rain(j,:)      = ray_rain;
-    scan_zhh(j,:)       = ray_zhh;
-    scan_vel(j,:)       = ray_vel;
-    scan_zdr(j,:)       = ray_zdr;
-    scan_kdp(j,:)       = ray_kdp;
-    scan_phidp(j,:)     = ray_phidp;
-    scan_rhohv(j,:)     = ray_rhohv;
-    scan_specwidth(j,:) = ray_specwidth;
+    data_struct.data1.data(j)   = info_id;
+    data_struct.data2.data(j)   = ray_azi;
+    data_struct.data3.data(j)   = ray_elv;
+    data_struct.data4.data(j,:) = ray_rain;
+    data_struct.data5.data(j,:) = ray_zhh;
+    data_struct.data6.data(j,:) = ray_vel;
+    data_struct.data7.data(j,:) = ray_zdr;
+    data_struct.data8.data(j,:) = ray_kdp;
+    data_struct.data9.data(j,:) = ray_phidp;
+    data_struct.data10.data(j,:) = ray_rhohv;
+    data_struct.data11.data(j,:) = ray_specwidth;
+    %no QC data
     
 end
 fclose(fid);
 
 %export header
-header_suffix = 'header';
-data_struct.(header_suffix) = struct('header_size',header_size,'file_vrsion',file_vrsion,...
-    'file_datetime',file_datetime,'lat_dec',lat_dec,'lon_dec',lon_dec,...
-    'ant_alt_up',ant_alt_up,'ant_alt_low',ant_alt_low,'ant_rot_spd',ant_rot_spd,...
+data_struct.header = struct('file_vrsion',file_vrsion,...
+    'lat_dec',lat_dec,'lon_dec',lon_dec,...
+    'ant_alt',ant_alt,'ant_rot_spd',ant_rot_spd,...
     'prf1',prf1,'prf2',prf2,'puls_noise',puls_noise,'freq_noise',freq_noise,...
     'num_smpls',num_smpls,'num_gates',num_gates,'gate_res',gate_res,...
     'radar_horz_constant',radar_horz_constant,'radar_vert_constant',radar_vert_constant,...
     'azi_offset',azi_offset,'scan_type',scan_type,'scn_ppi_step',scn_ppi_step,'scn_ppi_total',scn_ppi_total,...
     'rec_utc_datetime',rec_utc_datetime,'rec_item',rec_item,...
     'tx_blind_rng',tx_blind_rng,'tx_pulse_spec',tx_pulse_spec);
-%export data
-data_suffix = 'data';
-data_struct.(data_suffix) = struct('scan_id',scan_id,'scan_azi',scan_azi,'scan_elv',scan_elv,'scan_rng',scan_rng,...
-    'scan_bytes',scan_bytes,'scan_rain',scan_rain,'scan_zhh',scan_zhh,'scan_vel',scan_vel,'scan_zdr',scan_zdr,...
-    'scan_kdp',scan_kdp,'scan_phidp',scan_phidp,'scan_rhohv',scan_rhohv,'scan_specwidth',scan_specwidth,'scan_qc',scan_qc);

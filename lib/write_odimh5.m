@@ -66,7 +66,6 @@ group_id = H5G.create(root_id, 'how', 0, 0, 0);
 H5Acreatedouble(group_id, 'beamwidth', 2.7); %deg: does not change for WR2100
 H5Acreatedouble(group_id, 'wavelength', 3.165); %cm: does not change for WR2100
 H5Acreatedouble(group_id, 'rpm', header_struct.ant_rot_spd); %azi speed in rpm
-H5Acreatedouble(group_id, 'pulsewidthmode', header_struct.tx_pulse_spec); %CUSTOM field for WR2100 pulse spec
 H5Acreatedouble(group_id, 'RXbandwidth', 60); %MHz: Does not change
 H5Acreatedouble(group_id, 'lowprf', header_struct.prf1); %Hz
 H5Acreatedouble(group_id, 'highprf', header_struct.prf2); %Hz
@@ -76,15 +75,15 @@ H5Acreatedouble(group_id, 'TXpower', 0.1); %kW: Does not change
 
 %add FURUNO specific fields to how root group (non odimh5 V2.2)
 H5Acreatedouble(group_id, 'FURUNO_file_vrsion',header_struct.file_vrsion); %Hz
-H5Acreatedouble(group_id, 'FURUNO_ant_rot_spd',header_struct.ant_rot_spd); %Hz
-H5Acreatedouble(group_id, 'FURUNO_prf1',header_struct.prf1); %Hz
-H5Acreatedouble(group_id, 'FURUNO_prf2',header_struct.prf2); %Hz
 H5Acreatedouble(group_id, 'FURUNO_puls_noise',header_struct.puls_noise); %dBm
 H5Acreatedouble(group_id, 'FURUNO_freq_noise',header_struct.freq_noise); %dBm
-H5Acreatedouble(group_id, 'FURUNO_azi_offset',header_struct.azi_offset); %degTn
 H5Acreatedouble(group_id, 'FURUNO_gate_res',header_struct.gate_res); %m
 H5Acreatedouble(group_id, 'FURUNO_num_smpls',header_struct.num_smpls); %qty
 H5Acreatedouble(group_id, 'FURUNO_num_gates',header_struct.num_gates); %qty
+H5Acreatedouble(group_id, 'FURUNO_azi_offset',header_struct.azi_offset); %degTn
+H5Acreatedouble(group_id, 'FURUNO_scan_type',header_struct.scan_type);
+H5Acreatedouble(group_id, 'FURUNO_scn_ppi_step',header_struct.scn_ppi_step);
+H5Acreatedouble(group_id, 'FURUNO_scn_ppi_total',header_struct.scn_ppi_total);
 H5Acreatedouble(group_id, 'FURUNO_rec_item',header_struct.rec_item); %qty
 H5Acreatedouble(group_id, 'FURUNO_tx_blind_rng',header_struct.tx_blind_rng); %m
 H5Acreatedouble(group_id, 'FURUNO_tx_pulse_spec',header_struct.tx_pulse_spec); %1-10

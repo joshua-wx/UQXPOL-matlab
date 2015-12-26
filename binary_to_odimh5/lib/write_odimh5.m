@@ -74,6 +74,21 @@ H5Acreatedouble(group_id, 'radconstH', header_struct.radar_horz_constant); %dB
 H5Acreatedouble(group_id, 'radconstV', header_struct.radar_vert_constant); %dB
 H5Acreatedouble(group_id, 'TXpower', 0.1); %kW: Does not change
 
+%add FURUNO specific fields to how root group (non odimh5 V2.2)
+H5Acreatedouble(group_id, 'FURUNO_file_vrsion',header_struct.file_vrsion); %Hz
+H5Acreatedouble(group_id, 'FURUNO_ant_rot_spd',header_struct.ant_rot_spd); %Hz
+H5Acreatedouble(group_id, 'FURUNO_prf1',header_struct.prf1); %Hz
+H5Acreatedouble(group_id, 'FURUNO_prf2',header_struct.prf2); %Hz
+H5Acreatedouble(group_id, 'FURUNO_puls_noise',header_struct.puls_noise); %dBm
+H5Acreatedouble(group_id, 'FURUNO_freq_noise',header_struct.freq_noise); %dBm
+H5Acreatedouble(group_id, 'FURUNO_azi_offset',header_struct.azi_offset); %degTn
+H5Acreatedouble(group_id, 'FURUNO_gate_res',header_struct.gate_res); %m
+H5Acreatedouble(group_id, 'FURUNO_num_smpls',header_struct.num_smpls); %qty
+H5Acreatedouble(group_id, 'FURUNO_num_gates',header_struct.num_gates); %qty
+H5Acreatedouble(group_id, 'FURUNO_rec_item',header_struct.rec_item); %qty
+H5Acreatedouble(group_id, 'FURUNO_tx_blind_rng',header_struct.tx_blind_rng); %m
+H5Acreatedouble(group_id, 'FURUNO_tx_pulse_spec',header_struct.tx_pulse_spec); %1-10
+
 %close file
 H5F.close(file_id);
 

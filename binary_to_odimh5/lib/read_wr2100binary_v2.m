@@ -35,8 +35,8 @@ ant_alt_low = fread(fid, 1, 'ushort');       %cm
 ant_rot_spd = fread(fid, 1, 'ushort')/10;    %rpm
 prf1        = fread(fid, 1, 'ushort')/10;    %Hz
 prf2        = fread(fid, 1, 'ushort')/10;    %Hz
-horz_noise  = fread(fid, 1, 'short')/100;    %dBm
-vert_noise  = fread(fid, 1, 'short')/100;    %dBm
+puls_noise  = fread(fid, 1, 'short')/100;    %dBm
+freq_noise  = fread(fid, 1, 'short')/100;    %dBm
 num_smpls   = fread(fid, 1, 'ushort');       %qty
 num_gates   = fread(fid, 1, 'ushort');       %qty
 gate_res    = fread(fid, 1, 'ushort')/100;   %m
@@ -56,6 +56,8 @@ rec_utc_datetime = addtodate(file_datetime,v2_utc_offset,'hour');
 
 %unknown pulse spec in v2 files
 tx_pulse_spec = 0;
+tx_blind_rng  = 0;
+rec_item      = 0;
 
 azi_offset = fread(fid, 1, 'ushort')/100; %degTn
 
@@ -164,11 +166,12 @@ header_suffix = 'header';
 data_struct.(header_suffix) = struct('header_size',header_size,'file_vrsion',file_vrsion,...
     'file_datetime',file_datetime,'lat_dec',lat_dec,'lon_dec',lon_dec,...
     'ant_alt_up',ant_alt_up,'ant_alt_low',ant_alt_low,'ant_rot_spd',ant_rot_spd,...
-    'prf1',prf1,'prf2',prf2,'horz_noise',horz_noise,'vert_noise',vert_noise,...
+    'prf1',prf1,'prf2',prf2,'puls_noise',puls_noise,'freq_noise',freq_noise,...
     'num_smpls',num_smpls,'num_gates',num_gates,'gate_res',gate_res,...
     'radar_horz_constant',radar_horz_constant,'radar_vert_constant',radar_vert_constant,...
     'azi_offset',azi_offset,'scan_type',scan_type,'scn_ppi_step',scn_ppi_step,'scn_ppi_total',scn_ppi_total,...
-    'rec_utc_datetime',rec_utc_datetime,'tx_pulse_spec',tx_pulse_spec);
+    'rec_utc_datetime',rec_utc_datetime,'rec_item',rec_item,...
+    'tx_blind_rng',tx_blind_rng,'tx_pulse_spec',tx_pulse_spec);
 %export data
 data_suffix = 'data';
 data_struct.(data_suffix) = struct('scan_id',scan_id,'scan_azi',scan_azi,'scan_elv',scan_elv,'scan_rng',scan_rng,...

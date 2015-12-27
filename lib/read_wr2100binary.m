@@ -1,4 +1,4 @@
-function data_struct=read_wr2100binary(binary_ffn)
+function radar_struct=read_wr2100binary(binary_ffn)
 %Joshua Soderholm, December 2015
 %Climate Research Group, University of Queensland
 
@@ -13,9 +13,9 @@ fclose(fid);
 
 %Select reader version
 if file_vrsion==2
-    data_struct = read_wr2100binary_v2(binary_ffn);
+    radar_struct = read_wr2100binary_v2(binary_ffn);
 elseif file_vrsion==3
-    data_struct = read_wr2100binary_v3(binary_ffn);
+    radar_struct = read_wr2100binary_v3(binary_ffn);
 else
     msgbox('unknown wr2100 file version')
     return

@@ -1,18 +1,18 @@
-function write_odimh5(data_struct,output_path)
+function write_odimh5(radar_struct,output_path)
 %Joshua Soderholm, December 2015
 %Climate Research Group, University of Queensland
 
-%WHAT: writes radar object in data_struct to odminh5 compliant file
+%WHAT: writes radar object in radar_struct to odminh5 compliant file
 
 %read config
 temp_config_mat   = 'etc/current_config.mat';
 load(temp_config_mat);
 
 %create h5 ffn
-scan_date = datestr(data_struct.header.rec_utc_datetime,'yyyymmdd_HHMMSS');
-scan_type = data_struct.header.scan_type;
+scan_date = datestr(radar_struct.header.rec_utc_datetime,'yyyymmdd_HHMMSS');
+scan_type = radar_struct.header.scan_type;
 if strcmp(scan_type,'scn') %append ppi numbers to scn filename
-    scan_type = [scan_type,'_',num2str(data_struct.header.scn_ppi_total,'%02.0f'),'_',num2str(data_struct.header.scn_ppi_step,'%02.0f')];
+    scan_type = [scan_type,'_',num2str(radar_struct.header.scn_ppi_total,'%02.0f'),'_',num2str(radar_struct.header.scn_ppi_step,'%02.0f')];
 end
 h5_ffn = [output_path,'/uq-xpol_',scan_type,'_',scan_date,'.h5'];
 
@@ -22,10 +22,10 @@ if exist(h5_ffn,'file')==2
 end
 
 %write header
-write_hdf_header(h5_ffn,data_struct.header);
+write_hdf_header(h5_ffn,radar_struct.header);
 
 %write datasets
-write_hdf_v2(h5_ffn,data_struct);
+write_hdf_v2(h5_ffn,radar_struct);
 
  
 function write_hdf_header(h5_fn,header_struct)
@@ -54,6 +54,7 @@ H5Acreatestring(group_id, 'time', datestr(header_struct.rec_utc_datetime,'HHMMSS
 H5Acreatestring(group_id, 'object', scan_object);
 H5Acreatestring(group_id, 'source', 'RAD:AU99,PLC:WOK');
 H5Acreatestring(group_id, 'version', 'H5rad 2.2');
+H5Acreatestring(group_id, 'FURUNO_radar_model','WR2100');
 
 %where root group
 group_id = H5G.create(root_id, 'where', 0, 0, 0);
@@ -77,11 +78,11 @@ H5Acreatedouble(group_id, 'TXpower', 0.1); %kW: Does not change
 H5Acreatedouble(group_id, 'FURUNO_file_vrsion',header_struct.file_vrsion); %Hz
 H5Acreatedouble(group_id, 'FURUNO_puls_noise',header_struct.puls_noise); %dBm
 H5Acreatedouble(group_id, 'FURUNO_freq_noise',header_struct.freq_noise); %dBm
-H5Acreatedouble(group_id, 'FURUNO_gate_res',header_struct.gate_res); %m
 H5Acreatedouble(group_id, 'FURUNO_num_smpls',header_struct.num_smpls); %qty
 H5Acreatedouble(group_id, 'FURUNO_num_gates',header_struct.num_gates); %qty
+H5Acreatedouble(group_id, 'FURUNO_gate_res',header_struct.gate_res); %m
 H5Acreatedouble(group_id, 'FURUNO_azi_offset',header_struct.azi_offset); %degTn
-H5Acreatedouble(group_id, 'FURUNO_scan_type',header_struct.scan_type);
+H5Acreatestring(group_id, 'FURUNO_scan_type',header_struct.scan_type);
 H5Acreatedouble(group_id, 'FURUNO_scn_ppi_step',header_struct.scn_ppi_step);
 H5Acreatedouble(group_id, 'FURUNO_scn_ppi_total',header_struct.scn_ppi_total);
 H5Acreatedouble(group_id, 'FURUNO_rec_item',header_struct.rec_item); %qty
@@ -91,10 +92,10 @@ H5Acreatedouble(group_id, 'FURUNO_tx_pulse_spec',header_struct.tx_pulse_spec); %
 %close file
 H5F.close(file_id);
 
-function write_hdf_v2(h5_fn,data_struct)
+function write_hdf_v2(h5_fn,radar_struct)
 
 %set scan type
-scan_type = data_struct.header.scan_type;
+scan_type = radar_struct.header.scan_type;
 if strcmp(scan_type,'scn')
     scan_product = 'PVOL'; %SCAN
     scan_param   = 'PPI';
@@ -125,22 +126,22 @@ g_id     = H5G.create(group_id, 'what', 0, 0, 0);
 
 H5Acreatestring(g_id, 'product', scan_product);
 H5Acreatestring(g_id, 'prodpar', scan_param);
-H5Acreatestring(g_id, 'startdate', datestr(data_struct.header.rec_utc_datetime,'yyyymmdd'));
-H5Acreatestring(g_id, 'starttime', datestr(data_struct.header.rec_utc_datetime,'HHMMSS'));
-H5Acreatestring(g_id, 'enddate', datestr(data_struct.header.rec_utc_datetime,'yyyymmdd'));
-H5Acreatestring(g_id, 'endtime', datestr(data_struct.header.rec_utc_datetime,'HHMMSS'));
+H5Acreatestring(g_id, 'startdate', datestr(radar_struct.header.rec_utc_datetime,'yyyymmdd'));
+H5Acreatestring(g_id, 'starttime', datestr(radar_struct.header.rec_utc_datetime,'HHMMSS'));
+H5Acreatestring(g_id, 'enddate', datestr(radar_struct.header.rec_utc_datetime,'yyyymmdd'));
+H5Acreatestring(g_id, 'endtime', datestr(radar_struct.header.rec_utc_datetime,'HHMMSS'));
 
 %where dataset group
 g_id     = H5G.create(group_id, 'where', 0, 0, 0);
 
-nbins   = data_struct.header.num_gates;
-rscale  = data_struct.header.gate_res;
+nbins   = radar_struct.header.num_gates;
+rscale  = radar_struct.header.gate_res;
 
 if strcmp(scan_type,'scn') || strcmp(scan_type,'sppi') %scn and sppi where group
     
-    elangle = data_struct.data3.data(1); %elv
+    elangle = radar_struct.data3.data(1); %elv
     rstart  = 0;
-    nrays   = data_struct.header.num_smpls;
+    nrays   = radar_struct.header.num_smpls;
    
     H5Acreatedouble(g_id, 'elangle', elangle);
     H5Acreatelong(g_id, 'nbins', int64(nbins));
@@ -150,20 +151,20 @@ if strcmp(scan_type,'scn') || strcmp(scan_type,'sppi') %scn and sppi where group
     H5Acreatelong(g_id, 'a1gate', int64(0)); %just use 0 as 1st azimuth radiated in the scan
     if strcmp(scan_type,'sppi') %additional SPPI information
         
-        startaz = data_struct.data2.data(1);
-        stopaz  = data_struct.data2.data(end);
+        startaz = radar_struct.data2.data(1);
+        stopaz  = radar_struct.data2.data(end);
         
         H5Acreatedouble(g_id, 'startaz', startaz);
         H5Acreatedouble(g_id, 'stopaz', stopaz);
     end
 else %RHI where group
     
-    az_angle = data_struct.data2.data(1); %azi
-    angles   = data_struct.data3.data; %elv
+    az_angle = radar_struct.data2.data(1); %azi
+    angles   = radar_struct.data3.data; %elv
     range    = (nbins-1)*rscale/1000;
     
-    H5Acreatedouble(group_id, 'lat', data_struct.header.lat_dec);
-    H5Acreatedouble(group_id, 'lon', data_struct.header.lon_dec);
+    H5Acreatedouble(group_id, 'lat', radar_struct.header.lat_dec);
+    H5Acreatedouble(group_id, 'lon', radar_struct.header.lon_dec);
     H5Acreatedouble(g_id, 'az_angle', az_angle);
     H5Acreatedoublearray(g_id, 'angles', angles,size(angles));
     H5Acreatedouble(g_id, 'range', range);
@@ -176,15 +177,15 @@ g_id      = H5G.create(group_id, 'how', 0, 0, 0);
 
 %sort azi index for scn scans for odhimh5 compliant
 if strcmp(scan_type,'scn')
-    [~,sort_ind] = sort(data_struct.data2.data); %azi
+    [~,sort_ind] = sort(radar_struct.data2.data); %azi
 else
-    sort_ind = 1:length(data_struct.data2.data); %azi
+    sort_ind = 1:length(radar_struct.data2.data); %azi
 end
 
 %write data
-for i=1:length(fields(data_struct))-1 %loop through all data sets (1 less for header)
+for i=1:length(fields(radar_struct))-1 %loop through all data sets (1 less for header)
     data_index_name = ['data',num2str(i)];
-    dataset         = data_struct.(data_index_name);
+    dataset         = radar_struct.(data_index_name);
     create_data(i,sort_ind,group_id,dataset);
 end
 
@@ -254,8 +255,8 @@ g_id = H5G.create(data_id, 'what', 0, 0, 0);
 H5Acreatestring(g_id, 'quantity',dataset.quantity);
 H5Acreatedouble(g_id, 'gain', dataset.gain); %float
 H5Acreatedouble(g_id, 'offset', dataset.offset); %float
-H5Acreatedouble(g_id, 'nodata', 0.0);
-H5Acreatedouble(g_id, 'undetect', 0.1);
+H5Acreatedouble(g_id, 'nodata', dataset.nodata);
+H5Acreatedouble(g_id, 'undetect', dataset.undetect);
 
 %data how group
 g_id = H5G.create(data_id, 'how', 0, 0, 0);

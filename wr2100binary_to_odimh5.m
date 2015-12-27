@@ -71,9 +71,9 @@ while true
     for i=1:length(fileList)
         display(['converting file ',fileList{i}])
         %push file to wr2100binary reader
-        data_struct = read_wr2100binary(fileList{i});
+        radar_struct = read_wr2100binary(fileList{i});
         %push out to odimh5
-        write_odimh5(data_struct,output_path)
+        write_odimh5(radar_struct,output_path)
     end
     
     %break while loop is kill file is not present

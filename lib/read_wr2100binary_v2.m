@@ -1,4 +1,4 @@
-function data_struct=read_wr2100binary_v2(binary_ffn)
+function radar_struct=read_wr2100binary_v2(binary_ffn)
 %for pre 9/11/2015 dualpol files
 
 % Open file
@@ -80,18 +80,18 @@ empty_vec = zeros(num_smpls,1);
 empty_mat = zeros(num_smpls,num_gates);
 
 %preallocate
-data_struct.data1  = struct('data',empty_vec,'quantity','FURUNO_ID','offset',0,'gain',0);
-data_struct.data2  = struct('data',empty_vec,'quantity','FURUNO_AZI','offset',0,'gain',0);
-data_struct.data3  = struct('data',empty_vec,'quantity','FURUNO_ELV','offset',0,'gain',0);
-data_struct.data4  = struct('data',empty_mat,'quantity','RATE','offset',-327.68,'gain',.01);
-data_struct.data5  = struct('data',empty_mat,'quantity','DBZH','offset',-327.68,'gain',.01);
-data_struct.data6  = struct('data',empty_mat,'quantity','VRADH','offset',-327.68,'gain',.01);
-data_struct.data7  = struct('data',empty_mat,'quantity','ZDR','offset',-327.68,'gain',.01);
-data_struct.data8  = struct('data',empty_mat,'quantity','KDP','offset',-327.68,'gain',.01);
-data_struct.data9  = struct('data',empty_mat,'quantity','PHIDP','offset',360/65535,'gain',-360/65535);
-data_struct.data10 = struct('data',empty_mat,'quantity','RHOHV','offset',-2/65534,'gain',2/65534);
-data_struct.data11 = struct('data',empty_mat,'quantity','WRADH','offset',-.01,'gain',-.01);
-data_struct.data12 = struct('data',empty_mat,'quantity','FURUNO_QC','offset',0,'gain',0);
+radar_struct.data1  = struct('data',empty_vec,'quantity','FURUNO_ID','offset',0,'gain',0,'nodata',0,'undetect',0);
+radar_struct.data2  = struct('data',empty_vec,'quantity','FURUNO_AZI','offset',0,'gain',0,'nodata',0,'undetect',0);
+radar_struct.data3  = struct('data',empty_vec,'quantity','FURUNO_ELV','offset',0,'gain',0,'nodata',0,'undetect',0);
+radar_struct.data4  = struct('data',empty_mat,'quantity','RATE','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
+radar_struct.data5  = struct('data',empty_mat,'quantity','DBZH','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
+radar_struct.data6  = struct('data',empty_mat,'quantity','VRADH','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
+radar_struct.data7  = struct('data',empty_mat,'quantity','ZDR','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
+radar_struct.data8  = struct('data',empty_mat,'quantity','KDP','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
+radar_struct.data9  = struct('data',empty_mat,'quantity','PHIDP','offset',360/65535,'gain',-360/65535,'nodata',0,'undetect',0);
+radar_struct.data10 = struct('data',empty_mat,'quantity','RHOHV','offset',-2/65534,'gain',2/65534,'nodata',0,'undetect',0);
+radar_struct.data11 = struct('data',empty_mat,'quantity','WRADH','offset',-.01,'gain',-.01,'nodata',0,'undetect',0);
+radar_struct.data12 = struct('data',empty_mat,'quantity','FURUNO_QC','offset',0,'gain',0,'nodata',0,'undetect',0);
 
 %begin data read loop
 for j=1:num_smpls
@@ -146,24 +146,24 @@ for j=1:num_smpls
 %     ray_specwidth = (ray_specwidth-1)./100;
     
     %allocate
-    data_struct.data1.data(j)   = info_id;
-    data_struct.data2.data(j)   = ray_azi;
-    data_struct.data3.data(j)   = ray_elv;
-    data_struct.data4.data(j,:) = ray_rain;
-    data_struct.data5.data(j,:) = ray_zhh;
-    data_struct.data6.data(j,:) = ray_vel;
-    data_struct.data7.data(j,:) = ray_zdr;
-    data_struct.data8.data(j,:) = ray_kdp;
-    data_struct.data9.data(j,:) = ray_phidp;
-    data_struct.data10.data(j,:) = ray_rhohv;
-    data_struct.data11.data(j,:) = ray_specwidth;
+    radar_struct.data1.data(j)   = info_id;
+    radar_struct.data2.data(j)   = ray_azi;
+    radar_struct.data3.data(j)   = ray_elv;
+    radar_struct.data4.data(j,:) = ray_rain;
+    radar_struct.data5.data(j,:) = ray_zhh;
+    radar_struct.data6.data(j,:) = ray_vel;
+    radar_struct.data7.data(j,:) = ray_zdr;
+    radar_struct.data8.data(j,:) = ray_kdp;
+    radar_struct.data9.data(j,:) = ray_phidp;
+    radar_struct.data10.data(j,:) = ray_rhohv;
+    radar_struct.data11.data(j,:) = ray_specwidth;
     %no QC data
     
 end
 fclose(fid);
 
 %export header
-data_struct.header = struct('file_vrsion',file_vrsion,...
+radar_struct.header = struct('file_vrsion',file_vrsion,...
     'lat_dec',lat_dec,'lon_dec',lon_dec,...
     'ant_alt',ant_alt,'ant_rot_spd',ant_rot_spd,...
     'prf1',prf1,'prf2',prf2,'puls_noise',puls_noise,'freq_noise',freq_noise,...

@@ -83,9 +83,9 @@ empty_vec = zeros(num_smpls,1);
 empty_mat = zeros(num_smpls,num_gates);
 
 %preallocate
-radar_struct.data1  = struct('data',empty_vec,'quantity','FURUNO_ID','offset',0,'gain',0,'nodata',0,'undetect',0);
-radar_struct.data2  = struct('data',empty_vec,'quantity','FURUNO_AZI','offset',0,'gain',0,'nodata',0,'undetect',0);
-radar_struct.data3  = struct('data',empty_vec,'quantity','FURUNO_ELV','offset',0,'gain',0,'nodata',0,'undetect',0);
+radar_struct.data1  = struct('data',empty_vec,'quantity','FURUNO_ID','offset',0,'gain',1,'nodata',0,'undetect',0);
+radar_struct.data2  = struct('data',empty_vec,'quantity','FURUNO_AZI','offset',0,'gain',1,'nodata',0,'undetect',0);
+radar_struct.data3  = struct('data',empty_vec,'quantity','FURUNO_ELV','offset',0,'gain',1,'nodata',0,'undetect',0);
 radar_struct.data4  = struct('data',empty_mat,'quantity','RATE','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
 radar_struct.data5  = struct('data',empty_mat,'quantity','DBZH','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
 radar_struct.data6  = struct('data',empty_mat,'quantity','VRADH','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
@@ -94,7 +94,7 @@ radar_struct.data8  = struct('data',empty_mat,'quantity','KDP','offset',-327.68,
 radar_struct.data9  = struct('data',empty_mat,'quantity','PHIDP','offset',360/65535,'gain',-360/65535,'nodata',0,'undetect',0);
 radar_struct.data10 = struct('data',empty_mat,'quantity','RHOHV','offset',-2/65534,'gain',2/65534,'nodata',0,'undetect',0);
 radar_struct.data11 = struct('data',empty_mat,'quantity','WRADH','offset',-.01,'gain',-.01,'nodata',0,'undetect',0);
-radar_struct.data12 = struct('data',empty_mat,'quantity','FURUNO_QC','offset',0,'gain',0,'nodata',0,'undetect',0);
+radar_struct.data12 = struct('data',empty_mat,'quantity','FURUNO_QC','offset',0,'gain',1,'nodata',0,'undetect',0);
 
 %begin data read loop
 for j=1:num_smpls

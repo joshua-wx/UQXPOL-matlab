@@ -35,7 +35,7 @@ scan_type = header_struct.scan_type;
 if strcmp(scan_type,'scn')
     scan_object = 'PVOL'; %SCAN
 elseif strcmp(scan_type,'rhi')
-    scan_object = 'ELEV';
+    scan_object = 'ELEV'; %RHI
 elseif strcmp(scan_type,'sppi')
     scan_object = 'PVOL'; %SCAN
 end

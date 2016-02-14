@@ -89,5 +89,3 @@ for i=1:num_data %loop through all data sets
     %add to struct
     radar_struct.(data_name)    = struct('data',data,'quantity',quantity,'offset',offset,'gain',gain,'nodata',nodata,'undetect',undetect);
 end
-
-keyboard

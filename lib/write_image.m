@@ -46,9 +46,9 @@ ang_vec = linspace(ang_vec(1),ang_vec(end),length(ang_vec));
 %ndgrid
 [rng_grid,ang_grid] = ndgrid(rng_vec,ang_vec);
 
-% %remove noise from wr2100 datasets, no noise removal required for CP2
-% %hybrid pulse
-% noise_grid = rhohv_grid > .4;
+%remove noise from wr2100 datasets, no noise removal required for CP2
+%hybrid pulse
+% noise_grid = rhohv_grid > .1;
 % 
 % zhh_grid(~noise_grid) = nan;
 % vel_grid(~noise_grid) = nan;
@@ -59,12 +59,12 @@ extreme_mask = abs(vel_grid)>=50;
 vel_grid(extreme_mask) = nan;
 
 %setup x,y output grids
-max_intp_rng = 25000;
+max_intp_rng = 15000;
 min_intp_rhi_h = 0;
-max_intp_rhi_h = 5000;
+max_intp_rhi_h = 4000;
 intp_grid    = 50;
 
-intp_x_vec = -max_intp_rng:intp_grid:max_intp_rng;
+intp_x_vec = 0:intp_grid:max_intp_rng;
 intp_y_vec = min_intp_rhi_h:intp_grid:max_intp_rhi_h; %max rhi depth 15km
 
 %convert to ang/rng
@@ -74,7 +74,7 @@ intp_z_grid                   = zeros(size(intp_x_grid));
 intp_ang_grid = rad2deg(intp_ang_grid);
 
 %apply medfilt2 to vel
-vel_grid = medfilt2(vel_grid,[7,7]);
+%vel_grid = medfilt2(vel_grid,[7,7]);
 
 %run interpolant
 intp_zhh = interpn(ang_grid',rng_grid',zhh_grid',intp_ang_grid,intp_rng_grid,'nearest');
@@ -98,43 +98,15 @@ plot_y_grid = intp_y_grid./1000;
     
     %plot ZHH
     surface(plot_x_grid,plot_y_grid,intp_z_grid,'CData',filt_zhh2,'EdgeColor','none','FaceColor','texturemap');
-    
-%     %plot negative velocity
-%     if contour_neg_plot
-%         contour_interval=[contour_neg_min:contour_neg_int:contour_neg_max];
-%         [doplpos_C,doplpos_h]=contour(plot_x_grid,plot_y_grid,eval(contour_neg_var),contour_interval,'Fill','off','LineColor',contour_neg_line_color,'LineWidth',contour_neg_line_width,'LineStyle','-');
-%         if contour_pos_labels
-%             text_handle = clabel(doplpos_C,doplpos_h,contour_neg_l_vec,'LabelSpacing',contour_neg_l_space); %MODIDY LABEL INTERVAL AND SPACING
-%             set(text_handle,'FontWeight','bold','FontName','Helvetica','FontSize',contour_neg_l_size);
-%         end
-%     end
+
+%         %plot negative velocity
+%         contour_interval=[-20:2:-2];
+%         [doplpos_C,doplpos_h]=contour(plot_x_grid,plot_y_grid,filt_vel2,contour_interval,'Fill','off','LineColor','k','LineWidth',1,'LineStyle','-');
+%     
 %     %plot positive velocity
-%     if contour_pos_plot
-%         contour_interval=[contour_pos_min:contour_pos_int:contour_pos_max];
-%         [doplpos_C,doplpos_h]=contour(plot_x_grid,plot_y_grid,eval(contour_pos_var),contour_interval,'Fill','off','LineColor',contour_pos_line_color,'LineWidth',contour_pos_line_width,'LineStyle','--');
-%         if contour_pos_labels
-%             text_handle = clabel(doplpos_C,doplpos_h,contour_pos_l_vec,'LabelSpacing',contour_pos_l_space); %MODIDY LABEL INTERVAL AND SPACING
-%             set(text_handle,'FontWeight','bold','FontName','Helvetica','FontSize',contour_pos_l_size);
-%         end
-%     end
-    %     %plot negative velocity
-%     if contour_neg_plot
-%         contour_interval=[contour_neg_min:contour_neg_int:contour_neg_max];
-%         [doplpos_C,doplpos_h]=contour(plot_x_grid,plot_y_grid,eval(contour_neg_var),contour_interval,'Fill','off','LineColor',contour_neg_line_color,'LineWidth',contour_neg_line_width,'LineStyle','-');
-%         if contour_pos_labels
-%             text_handle = clabel(doplpos_C,doplpos_h,contour_neg_l_vec,'LabelSpacing',contour_neg_l_space); %MODIDY LABEL INTERVAL AND SPACING
-%             set(text_handle,'FontWeight','bold','FontName','Helvetica','FontSize',contour_neg_l_size);
-%         end
-%     end
-%     %plot positive velocity
-%     if contour_pos_plot
-%         contour_interval=[contour_pos_min:contour_pos_int:contour_pos_max];
-%         [doplpos_C,doplpos_h]=contour(plot_x_grid,plot_y_grid,eval(contour_pos_var),contour_interval,'Fill','off','LineColor',contour_pos_line_color,'LineWidth',contour_pos_line_width,'LineStyle','--');
-%         if contour_pos_labels
-%             text_handle = clabel(doplpos_C,doplpos_h,contour_pos_l_vec,'LabelSpacing',contour_pos_l_space); %MODIDY LABEL INTERVAL AND SPACING
-%             set(text_handle,'FontWeight','bold','FontName','Helvetica','FontSize',contour_pos_l_size);
-%         end
-%     end
+%         contour_interval=[2:2:20];
+%         [doplpos_C,doplpos_h]=contour(plot_x_grid,plot_y_grid,filt_vel2,contour_interval,'Fill','off','LineColor','k','LineWidth',1,'LineStyle','--');
+%     
 
     
 %     %plot ZDR
@@ -147,7 +119,7 @@ plot_y_grid = intp_y_grid./1000;
 %     end
     
 %setup colormap
-caxis([0,40]) %MODIFY ACCORDING TO LIMITS OF SURFACE IMAGE
+caxis([-10,40]) %MODIFY ACCORDING TO LIMITS OF SURFACE IMAGE
 temp_cmap=[[1,1,1];colormap(jet(128))];
 colormap(temp_cmap)
 
@@ -176,6 +148,6 @@ title(['RHI cross section for ',datestr(file_datetime,'dd-mm-yyyy HH:MM:SS'),' a
 
 %export
 addpath('export_fig')
-export_ffn = ['/home/meso/RecData_BCPE_20160213/rhi/set1_images',datestr(file_datetime,'yyyymmddHHMMSS'),'_az',azi_txt,'.png'];
+export_ffn = ['/home/meso/RecData_BCPE_20160213/rhi/set1_images/',datestr(file_datetime,'yyyymmddHHMMSS'),'_az',azi_txt,'.png'];
 print(hfig,'-dpng','-painters',export_ffn)
 close(hfig)

@@ -4,3 +4,4 @@
 - 20151220 - Bug fixes and new tutorial notebook
 - 20151226 - Added all Furuno variaibles to odimh5 file and changed data_struct to a more universal format for adding new variables
 - 20151227 - Added new lib "add_field_to_struct" and "read_odimh5"
+- 20160214 - Added odim5_to_image.m and lib/write_image.m as a temporary measure for lack of odimh5 support in py-art

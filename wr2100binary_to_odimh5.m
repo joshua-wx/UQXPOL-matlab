@@ -1,5 +1,5 @@
 function wr2100binary_to_odimh5(config_input_path)
-%Joshua Soderholm, December 2015
+%Joshua Soderholm, Feb 2016
 %Climate Research Group, University of Queensland
 
 %WHAT: master script for processing wr2100 binary files to odimh5

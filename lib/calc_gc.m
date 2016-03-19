@@ -14,10 +14,12 @@ function radar_struct = calc_gc(radar_struct)
 %REFS
 % Based on Rico-Ramirez et al. 2008 and Gourley et al. 2007
 
-nds_gc_ffn     = '../etc/nds_GC.mat';%'Testing/ClearAir/20151221/nds_GC.mat';%
-nds_precip_ffn = '../etc/nds_precip.mat';%'Testing/ClearAir/20151221/nds_precip.mat';%
-noise_mean_ffn = '../etc/noise_mean.mat';%'noise_mean_501.mat';
-snr_level      = 5;
+read_config('etc/gc_calc.config','gc_calc.config.mat');%'../etc/gc_calc.config','gc_calc.config.mat'
+load('gc_calc.config.mat');
+% nds_gc_ffn     = 'Testing/ClearAir/20151221/nds_GC.mat';%'../etc/nds_GC.mat';
+% nds_precip_ffn = 'Testing/ClearAir/20151221/nds_precip.mat';%'../etc/nds_precip.mat';
+% noise_mean_ffn = 'noise_mean_501.mat';%'../etc/noise_mean.mat';
+% snr_level      = 5;
 
 %% Load nds function data
 load(nds_gc_ffn);
@@ -71,7 +73,7 @@ display('check timing for possible preallocation')
 %% Load data from struct
 
 azi = radar_struct.data2.data;
-elv = radar_struct.data3.data; %not used - yet
+elv = radar_struct.data3.data;
 zhh = radar_struct.data5.data;
 vel = radar_struct.data6.data;
 zdr = radar_struct.data7.data;

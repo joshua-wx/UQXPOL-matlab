@@ -10,4 +10,4 @@ next_data_int = length(fields(radar_struct))-1+1; %note -1 reminds that their is
 %create field name
 data_index_name = ['data',num2str(next_data_int)];
 %add data using field name
-radar_struct.data_index_name  = struct('data',data,'quantity',quantity,'offset',offset,'gain',gain);
+radar_struct.(data_index_name)  = struct('data',data,'quantity',quantity,'offset',offset,'gain',gain);

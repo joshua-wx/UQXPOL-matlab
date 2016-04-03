@@ -5,25 +5,12 @@ function write_image(data_struct)
 
 
 %extract datasets
-zhh_grid        = double(data_struct.data5.data);
-zhh_offset      = double(data_struct.data5.offset);
-zhh_gain        = double(data_struct.data5.gain);
-zhh_grid        = zhh_grid.*zhh_gain+zhh_offset;
+data_struct     = calc_vars(data_struct);
 
-vel_grid        = double(data_struct.data6.data);
-vel_offset      = double(data_struct.data6.offset);
-vel_gain        = double(data_struct.data6.gain);
-vel_grid        = vel_grid.*vel_gain+vel_offset;
-
-zdr_grid        = double(data_struct.data7.data);
-zdr_offset      = double(data_struct.data7.offset);
-zdr_gain        = double(data_struct.data7.gain);
-zdr_grid        = zdr_grid.*zdr_gain+zdr_offset;
-
-rhohv_grid      = double(data_struct.data10.data);
-rhohv_offset    = double(data_struct.data10.offset);
-rhohv_gain      = double(data_struct.data10.gain);
-rhohv_grid      = rhohv_grid.*rhohv_gain+rhohv_offset;
+zhh_grid        = data_struct.data5.data_var;
+vel_grid        = data_struct.data6.data_var;
+zdr_grid        = data_struct.data7.data_var;
+rhohv_grid      = data_struct.data10.data_var;
 
 %extract time
 file_datetime = data_struct.header.rec_utc_datetime;

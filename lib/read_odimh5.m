@@ -2,9 +2,11 @@ function radar_struct=read_odimh5(input_path)
 %Joshua Soderholm, December 2015
 %Climate Research Group, University of Queensland
 
-%WHAT: Reads a single odimh5 v2.2 file (created by this program) into data_struct
+%WHAT: Reads a single odimh5 v2.2 file (created by this program) into radar_struct
 
 %% Error checking
+
+radar_struct = struct;
 
 %check if input is a h5 file (not a folder etc)
 if exist(input_path,'file')~=2

@@ -1,27 +1,31 @@
-function write_image(data_struct)
+function write_image(radar_struct)
 %WHAT
 %Modified 13-02-2016 as a temporary fix for pyart lack of odim rhi
 %capability
 
 
 %extract datasets
-data_struct     = calc_vars(data_struct);
+radar_struct     = calc_vars(radar_struct);
 
-zhh_grid        = data_struct.data5.data_var;
-vel_grid        = data_struct.data6.data_var;
-zdr_grid        = data_struct.data7.data_var;
-rhohv_grid      = data_struct.data10.data_var;
+data_field      = find_data_idx(radar_struct,'DBZH');
+zhh_grid        = radar_struct.(data_field).data_var;
+data_field      = find_data_idx(radar_struct,'VRADH');
+vel_grid        = radar_struct.(data_field).data_var;
+data_field      = find_data_idx(radar_struct,'ZDR');
+zdr_grid        = radar_struct.(data_field).data_var;
+data_field      = find_data_idx(radar_struct,'RHOHV');
+rhohv_grid      = radar_struct.(data_field).data_var;
 
 %extract time
-file_datetime = data_struct.header.rec_utc_datetime;
+file_datetime = radar_struct.header.rec_utc_datetime;
 
 %setup slant range
-gate_res  = data_struct.header.gate_res;
-num_gates = data_struct.header.num_gates;
-azi_vec   = double(data_struct.data2.data);
-elv_vec   = double(data_struct.data3.data);
+gate_res  = radar_struct.header.gate_res;
+num_gates = radar_struct.header.num_gates;
+azi_vec   = double(radar_struct.data2.data);
+elv_vec   = double(radar_struct.data3.data);
 rng_vec   = gate_res:gate_res:gate_res*num_gates;
-scan_type = data_struct.header.scan_type;
+scan_type = radar_struct.header.scan_type;
 
 %%
 

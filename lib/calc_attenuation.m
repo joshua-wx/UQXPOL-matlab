@@ -21,11 +21,18 @@ load('att_calc.config.mat');
 
 %% Get data from struct
 
+%add data_var field to datasets in struct (apply offset and scaling)
+radar_struct     = calc_vars(radar_struct);
+
 % we'll need to check the data# position of new_phi
-zhh = radar_struct.data5.data;
-zdr = radar_struct.data7.data;
-rho = radar_struct.data10.data;
-phi = radar_struct.data9.data; %use old phi for now
+data_field = find_data_idx(radar_struct,'DBZH');
+zhh        = radar_struct.(data_field).data_var;
+data_field = find_data_idx(radar_struct,'ZDR');
+zdr        = radar_struct.(data_field).data_var;
+data_field = find_data_idx(radar_struct,'RHOHV');
+rho        = radar_struct.(data_field).data_var;
+data_field = find_data_idx(radar_struct,'PHIDP');
+phi        = radar_struct.(data_field).data_var; %use old phi for now
 % set range vector
 rng=0.3:0.1:size(zhh,2)/10; %starts from 300m as there are 2xnan in each radar variable which are removed later
 

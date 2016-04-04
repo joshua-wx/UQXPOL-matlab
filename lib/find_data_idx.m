@@ -1,4 +1,4 @@
-function data_field = find_data_index(radar_struct,quantity)
+function data_field = find_data_idx(radar_struct,quantity)
 %Joshua Soderholm, April 2016
 %Climate Research Group, University of Queensland
 

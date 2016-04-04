@@ -93,7 +93,7 @@ radar_struct.data7  = struct('data',empty_mat,'quantity','ZDR','offset',-327.68,
 radar_struct.data8  = struct('data',empty_mat,'quantity','KDP','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
 radar_struct.data9  = struct('data',empty_mat,'quantity','PHIDP','offset',-360/65535,'gain',360/65535,'nodata',0,'undetect',0);
 radar_struct.data10 = struct('data',empty_mat,'quantity','RHOHV','offset',-2/65534,'gain',2/65534,'nodata',0,'undetect',0);
-radar_struct.data11 = struct('data',empty_mat,'quantity','WRADH','offset',.01,'gain',-.01,'nodata',0,'undetect',0);
+radar_struct.data11 = struct('data',empty_mat,'quantity','WRADH','offset',-.01,'gain',.01,'nodata',0,'undetect',0);
 radar_struct.data12 = struct('data',empty_mat,'quantity','FURUNO_QC','offset',0,'gain',1,'nodata',0,'undetect',0);
 
 %begin data read loop

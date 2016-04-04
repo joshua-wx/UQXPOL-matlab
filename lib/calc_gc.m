@@ -72,13 +72,20 @@ display('check timing for possible preallocation')
 
 %% Load data from struct
 
-azi = radar_struct.data2.data;
-elv = radar_struct.data3.data;
-zhh = radar_struct.data5.data;
-vel = radar_struct.data6.data;
-zdr = radar_struct.data7.data;
-phi = radar_struct.data9.data;
-rho = radar_struct.data10.data;
+data_field = find_data_idx(radar_struct,'DBZH');
+zhh        = radar_struct.(data_field).data_var;
+data_field = find_data_idx(radar_struct,'ZDR');
+zdr        = radar_struct.(data_field).data_var;
+data_field = find_data_idx(radar_struct,'RHOHV');
+rho        = radar_struct.(data_field).data_var;
+data_field = find_data_idx(radar_struct,'PHIDP');
+phi        = radar_struct.(data_field).data_var;
+data_field = find_data_idx(radar_struct,'FURUNO_AZI');
+azi        = radar_struct.(data_field).data;
+data_field = find_data_idx(radar_struct,'FURUNO_ELV');
+elv        = radar_struct.(data_field).data;
+data_field = find_data_idx(radar_struct,'VRADH');
+vel        = radar_struct.(data_field).data;
 
 % data_size = size(zhh); %not used
 

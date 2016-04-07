@@ -25,14 +25,14 @@ load('att_calc.config.mat');
 radar_struct     = calc_vars(radar_struct);
 
 % we'll need to check the data# position of new_phi
-data_field = find_data_idx(radar_struct,'DBZH');
-zhh        = radar_struct.(data_field).data_var;
-data_field = find_data_idx(radar_struct,'ZDR');
-zdr        = radar_struct.(data_field).data_var;
-data_field = find_data_idx(radar_struct,'RHOHV');
-rho        = radar_struct.(data_field).data_var;
-data_field = find_data_idx(radar_struct,'PHIDP');
-phi        = radar_struct.(data_field).data_var; %use old phi for now
+zhh_field = find_data_idx(radar_struct,'DBZH');
+zhh        = radar_struct.(zhh_field).data_var;
+zdr_field = find_data_idx(radar_struct,'ZDR');
+zdr        = radar_struct.(zdr_field).data_var;
+rho_field = find_data_idx(radar_struct,'RHOHV');
+rho        = radar_struct.(rho_field).data_var;
+phi_field = find_data_idx(radar_struct,'PHIDP');
+phi        = radar_struct.(phi_field).data_var; %use old phi for now
 % set range vector
 rng=0.3:0.1:size(zhh,2)/10; %starts from 300m as there are 2xnan in each radar variable which are removed later
 
@@ -277,6 +277,6 @@ end %end of rain cell
 end %end of scan file
 %% Output data
 % don't add new fields, instead replace zhh & zdr
-radar_struct.data5.data=zhh_out;
-radar_struct.data7.data=zdr_out;
+radar_struct.(zhh_field).data=zhh_out;
+radar_struct.(zdr_field).data=zdr_out;
 end

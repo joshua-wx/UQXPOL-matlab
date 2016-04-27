@@ -40,19 +40,19 @@ kernel_21 = ones(1,21)/21; %for Zdr & Rho
 zhh_mean_s=mean(zhh_nan(:,5:10),2); zhh_mean_e=mean(zhh_nan(:,end-4:end),2); 
 zhh_pad=[repmat(zhh_mean_s,1,5),zhh_nan,repmat(zhh_mean_e,1,5)];
 zhh_filt=conv2(zhh_pad,kernel_11,'same');
-zhh_out=[nan(N(1,1),2),zhh_filt(:,6:end-5)];
+zhh_out=[nan(N(1,1),nan_idx-1),zhh_filt(:,6:end-5)];
 
 % Filter Zdr
 zdr_mean_s=mean(zdr_nan(:,5:10),2); zdr_mean_e=mean(zdr_nan(:,end-4:end),2);
 zdr_pad=[repmat(zdr_mean_s,1,10),zdr_nan,repmat(zdr_mean_e,1,10)];
 zdr_filt=conv2(zdr_pad,kernel_21,'same');
-zdr_out=[nan(N(1,1),2),zdr_filt(:,11:end-10)];
+zdr_out=[nan(N(1,1),nan_idx-1),zdr_filt(:,11:end-10)];
 
 % Filter Rho
 rho_mean_s=mean(rho_nan(:,5:10),2); rho_mean_e=mean(rho_nan(:,end-4:end),2);
 rho_pad=[repmat(rho_mean_s,1,10),rho_nan,repmat(rho_mean_e,1,10)];
 rho_filt=conv2(rho_pad,kernel_21,'same'); 
-rho_out=[nan(N(1,1),2),rho_filt(:,11:end-10)];
+rho_out=[nan(N(1,1),nan_idx-1),rho_filt(:,11:end-10)];
 
 % Output Data
 radar_struct.(zhh_field).data=zhh_out;

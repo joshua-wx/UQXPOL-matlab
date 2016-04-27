@@ -9,3 +9,6 @@
 - 20151227 - Added new lib "add_field_to_struct" and "read_odimh5"
 - 20160214 - Added odim5_to_image.m and lib/write_image.m as a temporary measure for lack of odimh5 support in py-art
 - 20160318 - Added calc_gc.m to repo
+- 20160403 - Added attenuation_calc.m to repo
+- 20160407 - Added calc_smth_data.m to repo
+- 20160427 - Added documentation for GC & Attenuation to /doc

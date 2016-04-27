@@ -38,8 +38,7 @@ fsrho_nds_pre = out_data.fsrho;
 frho_nds_pre  = out_data.frho;
 fvel_nds_pre  = out_data.fvel;
 
-%% Define density function vectors
-
+% Define density function vectors
 xszdr=0:0.01:15; %range of values for std(zdr) density function
 xszhh=0:0.01:30; %range of values for std(zhh) density function
 xsphi=0:0.01:50;%range of values for std(phi) density function
@@ -58,7 +57,7 @@ A4 = trapz(xsrho,min([fsrho_nds_gc;fsrho_nds_pre])); %srho
 A5 = trapz(xrho,min([frho_nds_gc;frho_nds_pre]));    %rho
 A6 = trapz(xvel,min([fvel_nds_gc;fvel_nds_pre]));    %vel
 
-%% Calculate Weights for each variable
+% Calculate Weights for each variable
 %eq. 4 in Gourley et al. 2007
 
 w1 = (1/A1).*sum([1/A1,1/A2,1/A3,1/A4,1/A5,1/A6]); %std(zdr)
@@ -102,7 +101,7 @@ end
 SNR=zhh-repmat(noise_mean,size(zhh,1),1);
 snr_thres=SNR>=snr_level; %set logical of pixels to keep
 
-%% Determine neighbourhood 3deg x 1.1km
+% Determine neighbourhood 3deg x 1.1km
 gate_res=radar_struct.header.gate_res;
 no_gates=1100./gate_res; %must be odd, relies on gate_res=100m
 d_azi=abs(nanmedian(diff(azi)));
@@ -112,7 +111,8 @@ if mod(no_azi,2)== 0 %test if even
     no_azi=no_azi+1; %set to odd
 end
 nhood=ones(no_azi,no_gates); %neighbourhood of 3deg x 1.1km
-%% Calculate additional fields
+
+% Calculate additional fields
 % std(zdr), std(zhh), std(phi), std(rho)
 
 % Calculate standard deviation in nhood using 
@@ -240,7 +240,7 @@ Q2_mat(:,:,3)=fsphi_gc.*w3; Q2_mat(:,:,4)=fsrho_gc.*w4;
 Q2_mat(:,:,5)=frho_gc.*w5;  Q2_mat(:,:,6)=fvel_gc.*w6;
 Q2=sum(Q2_mat,3)./sum_w; % Q value for Ground Clutter
 
-%% Determine the max Q of the three classes and assign the pixel as either
+% Determine the max Q of the three classes and assign the pixel as either
 % GC or precip.
 % logical
 pre=Q1>Q2; % precip

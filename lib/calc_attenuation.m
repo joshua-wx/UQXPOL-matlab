@@ -149,7 +149,7 @@ if snr_pad_e_5<0.5; snr_pad_e_5=zeros(1,2); else snr_pad_e_5=ones(1,2); end % ve
 snr_conv_5=conv2([snr_pad_s_5,double(snr_thres(i,3:end)),snr_pad_e_5],nhood5,'same'); %do convolution with padding
 snr_conv_5=snr_conv_5(3:end-2); % remove padding
 
-%% Create vector(s) that are the start and end of the rain cells for each ray
+% Create vector(s) that are the start and end of the rain cells for each ray
 % initialise variables
 inside_rain=0; rain_start=[];rain_end=[];
 for j=1:size(zhh,2)-2
@@ -220,6 +220,7 @@ for k=1:no_cells
     alpha_min=11; %alpha = 0.275
     % correct atteunation using appropriate alpha
     zhh_cor=bsxfun(@plus,zhh(i,r1+2:r0+2),2.*int_Ah(1,r1-r1+1:r0-r1+1)); %eq 1
+    % Step 5 in documentation
     % Set zdr(r0) from eq 14
     if zhh_cor(r0-r1+1)<=10
         zdr_r0=0;
@@ -258,6 +259,7 @@ for k=1:no_cells
     [~,alpha_min]=min(phi_err); %index of minimum error
     % correct atteunation using appropriate alpha
     zhh_cor=bsxfun(@plus,zhh(i,r1+2:r0+2),2.*int_Ah(alpha_min,r1-r1+1:r0-r1+1)); %eq 1
+    % Step 5 in documentation
     % Set zdr(r0) from eq 14
     if zhh_cor(r0-r1+1)<=10
         zdr_r0=0;

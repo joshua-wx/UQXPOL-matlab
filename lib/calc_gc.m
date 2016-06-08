@@ -79,12 +79,11 @@ data_field = find_data_idx(radar_struct,'RHOHV');
 rho        = radar_struct.(data_field).data;
 data_field = find_data_idx(radar_struct,'PHIDP');
 phi        = radar_struct.(data_field).data;
-data_field = find_data_idx(radar_struct,'FURUNO_AZI');
-azi        = radar_struct.(data_field).data;
-data_field = find_data_idx(radar_struct,'FURUNO_ELV');
-elv        = radar_struct.(data_field).data;
 data_field = find_data_idx(radar_struct,'VRADH');
 vel        = radar_struct.(data_field).data;
+
+azi        = radar_struct.header.data_azi;
+elv        = radar_struct.header.data_elv;
 
 % data_size = size(zhh); %not used
 

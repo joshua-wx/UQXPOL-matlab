@@ -88,6 +88,9 @@ H5Acreatedouble(group_id, 'FURUNO_scn_ppi_total',header_struct.scn_ppi_total);
 H5Acreatedouble(group_id, 'FURUNO_rec_item',header_struct.rec_item); %qty
 H5Acreatedouble(group_id, 'FURUNO_tx_blind_rng',header_struct.tx_blind_rng); %m
 H5Acreatedouble(group_id, 'FURUNO_tx_pulse_spec',header_struct.tx_pulse_spec); %1-10
+H5Acreatedoublearray(group_id, 'FURUNO_data_id', header_struct.data_id,size(header_struct.data_id));
+H5Acreatedoublearray(group_id, 'FURUNO_data_azi', header_struct.data_azi,size(header_struct.data_azi));
+H5Acreatedoublearray(group_id, 'FURUNO_data_elv', header_struct.data_elv,size(header_struct.data_elv));
 
 %close file
 H5F.close(file_id);
@@ -139,7 +142,7 @@ rscale  = radar_struct.header.gate_res;
 
 if strcmp(scan_type,'scn') || strcmp(scan_type,'sppi') %scn and sppi where group
     
-    elangle = radar_struct.data3.data(1); %elv
+    elangle = radar_struct.header.data_elv(1); %elv
     rstart  = 0;
     nrays   = radar_struct.header.num_smpls;
    
@@ -151,16 +154,16 @@ if strcmp(scan_type,'scn') || strcmp(scan_type,'sppi') %scn and sppi where group
     H5Acreatelong(g_id, 'a1gate', int64(0)); %just use 0 as 1st azimuth radiated in the scan
     if strcmp(scan_type,'sppi') %additional SPPI information
         
-        startaz = radar_struct.data2.data(1);
-        stopaz  = radar_struct.data2.data(end);
+        startaz = radar_struct.header.data_azi(1);
+        stopaz  = radar_struct.header.data_azi(end);
         
         H5Acreatedouble(g_id, 'startaz', startaz);
         H5Acreatedouble(g_id, 'stopaz', stopaz);
     end
 else %RHI where group
     
-    az_angle = radar_struct.data2.data(1); %azi
-    angles   = radar_struct.data3.data; %elv
+    az_angle = radar_struct.header.data_azi(1); %azi
+    angles   = radar_struct.header.data_elv; %elv
     range    = (nbins-1)*rscale/1000;
     
     H5Acreatedouble(group_id, 'lat', radar_struct.header.lat_dec);
@@ -177,9 +180,9 @@ g_id      = H5G.create(group_id, 'how', 0, 0, 0);
 
 %sort azi index for scn scans for odhimh5 compliant
 if strcmp(scan_type,'scn')
-    [~,sort_ind] = sort(radar_struct.data2.data); %azi
+    [~,sort_ind] = sort(radar_struct.header.data_azi); %azi
 else
-    sort_ind = 1:length(radar_struct.data2.data); %azi
+    sort_ind = 1:length(radar_struct.header.data_azi); %azi
 end
 
 %write data

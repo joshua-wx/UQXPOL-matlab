@@ -22,8 +22,8 @@ file_datetime = radar_struct.header.rec_utc_datetime;
 %setup slant range
 gate_res  = radar_struct.header.gate_res;
 num_gates = radar_struct.header.num_gates;
-azi_vec   = double(radar_struct.data2.data);
-elv_vec   = double(radar_struct.data3.data);
+azi_vec   = double(radar_struct.header.data_azi);
+elv_vec   = double(radar_struct.header.data_elv);
 rng_vec   = gate_res:gate_res:gate_res*num_gates;
 scan_type = radar_struct.header.scan_type;
 

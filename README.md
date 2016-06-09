@@ -12,3 +12,5 @@
 - 20160403 - Added attenuation_calc.m to repo
 - 20160407 - Added calc_smth_data.m to repo
 - 20160427 - Added documentation for GC & Attenuation to /doc
+- 20160608 - Moved FURUNO_ID AZI and ELV data from h5 files into headers to be h5 compliant. Changed readers (binary, odim), odim writer, gc script
+- 20160609 - Modified /what/object /data/product and /data/prodpar to match odim specs. No more PVOL since we don't produce volumes

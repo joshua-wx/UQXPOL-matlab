@@ -9,23 +9,39 @@ temp_config_mat   = 'etc/current_config.mat';
 load(temp_config_mat);
 
 %create h5 ffn
-scan_date = datestr(radar_struct.header.rec_utc_datetime,'yyyymmdd_HHMMSS');
-scan_type = radar_struct.header.scan_type;
-if strcmp(scan_type,'scn') %append ppi numbers to scn filename
-    scan_type = [scan_type,'_',num2str(radar_struct.header.scn_ppi_total,'%02.0f'),'_',num2str(radar_struct.header.scn_ppi_step,'%02.0f')];
+if collate_volumes == 1 %collate into volumes using shared fn_datetime
+    postfix      = datestr(radar_struct.header.fn_datetime,'yyyymmdd_HHMMSS');
+else %keep as seperate scans using unique rec_utc_datetime
+    postfix      = [datestr(radar_struct.header.rec_utc_datetime,'yyyymmdd_HHMMSS'),'_',num2str(radar_struct.header.dataset_no,'%02.0f')];
 end
-h5_ffn = [output_path,'/uq-xpol_',scan_type,'_',scan_date,'.h5'];
+scan_type    = radar_struct.header.scan_type;
+h5_ffn       = [output_path,'/99_',postfix,'.h5'];
+g_name       = ['dataset',num2str(radar_struct.header.dataset_no)];
 
 %remove h5 filename if it exists
 if exist(h5_ffn,'file')==2
-    delete(h5_ffn)
+    %check if datasetno exists
+    h5_info     = h5info(h5_ffn);
+    h5_datasets = {h5_info.Groups.Name};
+    %if dataset exists, ask user what to do (required GUI)
+    if any(strcmp(h5_datasets,['/',g_name]))
+        out = questdlg([g_name,' already exists in ',h5_ffn],'Dataset Exists in h5 File','Abort','Delete File');
+        if strcmp(out,'Abort')
+            return
+        else
+            %delete file
+            delete(h5_ffn);
+            %create new file
+            write_hdf_header(h5_ffn,radar_struct.header);
+        end
+    end
+else
+    %create new file, does not exist
+    write_hdf_header(h5_ffn,radar_struct.header);
 end
 
-%write header
-write_hdf_header(h5_ffn,radar_struct.header);
-
-%write datasets
-write_hdf_v2(h5_ffn,radar_struct);
+%write dataset
+write_hdf_dataset(h5_ffn,radar_struct,g_name);
 
  
 function write_hdf_header(h5_fn,header_struct)
@@ -52,7 +68,7 @@ group_id = H5G.create(root_id, 'what', 0, 0, 0);
 H5Acreatestring(group_id, 'date', datestr(header_struct.rec_utc_datetime,'yyyymmdd'));
 H5Acreatestring(group_id, 'time', datestr(header_struct.rec_utc_datetime,'HHMMSS'));
 H5Acreatestring(group_id, 'object', scan_object);
-H5Acreatestring(group_id, 'source', 'RAD:AU99,PLC:WOK');
+H5Acreatestring(group_id, 'source', 'RAD:AU99,PLC:WOK'); %this makes it work with BOM odimh5 readers
 H5Acreatestring(group_id, 'version', 'H5rad 2.2');
 H5Acreatestring(group_id, 'FURUNO_radar_model','WR2100');
 
@@ -64,6 +80,7 @@ H5Acreatedouble(group_id, 'height', header_struct.ant_alt);
 
 %how root group
 group_id = H5G.create(root_id, 'how', 0, 0, 0);
+H5Acreatestring(group_id, 'copyright', 'University of Queensland, Climate Research Group https://www.gpem.uq.edu.au/crg');
 H5Acreatedouble(group_id, 'beamwidth', 2.7); %deg: does not change for WR2100
 H5Acreatedouble(group_id, 'wavelength', 3.165); %cm: does not change for WR2100
 H5Acreatedouble(group_id, 'rpm', header_struct.ant_rot_spd); %azi speed in rpm
@@ -72,7 +89,7 @@ H5Acreatedouble(group_id, 'lowprf', header_struct.prf1); %Hz
 H5Acreatedouble(group_id, 'highprf', header_struct.prf2); %Hz
 H5Acreatedouble(group_id, 'radconstH', header_struct.radar_horz_constant); %dB
 H5Acreatedouble(group_id, 'radconstV', header_struct.radar_vert_constant); %dB
-H5Acreatedouble(group_id, 'TXpower', 0.1); %kW: Does not change
+H5Acreatedouble(group_id, 'peakpwr', 0.1); %kW: Does not change
 
 %add FURUNO specific fields to how root group (non odimh5 V2.2)
 H5Acreatedouble(group_id, 'FURUNO_file_vrsion',header_struct.file_vrsion); %Hz
@@ -83,19 +100,19 @@ H5Acreatedouble(group_id, 'FURUNO_num_gates',header_struct.num_gates); %qty
 H5Acreatedouble(group_id, 'FURUNO_gate_res',header_struct.gate_res); %m
 H5Acreatedouble(group_id, 'FURUNO_azi_offset',header_struct.azi_offset); %degTn
 H5Acreatestring(group_id, 'FURUNO_scan_type',header_struct.scan_type);
-H5Acreatedouble(group_id, 'FURUNO_scn_ppi_step',header_struct.scn_ppi_step);
-H5Acreatedouble(group_id, 'FURUNO_scn_ppi_total',header_struct.scn_ppi_total);
+H5Acreatedouble(group_id, 'FURUNO_product_no',header_struct.product_no);
 H5Acreatedouble(group_id, 'FURUNO_rec_item',header_struct.rec_item); %qty
 H5Acreatedouble(group_id, 'FURUNO_tx_blind_rng',header_struct.tx_blind_rng); %m
 H5Acreatedouble(group_id, 'FURUNO_tx_pulse_spec',header_struct.tx_pulse_spec); %1-10
-H5Acreatedoublearray(group_id, 'FURUNO_data_id', header_struct.data_id,size(header_struct.data_id));
-H5Acreatedoublearray(group_id, 'FURUNO_data_azi', header_struct.data_azi,size(header_struct.data_azi));
-H5Acreatedoublearray(group_id, 'FURUNO_data_elv', header_struct.data_elv,size(header_struct.data_elv));
+%These are not essential
+% H5Acreatedoublearray(group_id, 'FURUNO_data_id', header_struct.data_id,size(header_struct.data_id));
+% H5Acreatedoublearray(group_id, 'FURUNO_data_azi', header_struct.data_azi,size(header_struct.data_azi));
+% H5Acreatedoublearray(group_id, 'FURUNO_data_elv', header_struct.data_elv,size(header_struct.data_elv));
 
 %close file
 H5F.close(file_id);
 
-function write_hdf_v2(h5_fn,radar_struct)
+function write_hdf_dataset(h5_fn,radar_struct,g_name)
 
 %set scan type
 scan_type = radar_struct.header.scan_type;
@@ -113,9 +130,6 @@ end
 %set compression
 chunk_size   = [45 80];
 deflate_scal = 6;
-
-%get group name
-g_name = ['dataset1'];
 
 %set h5 ids
 file_id   = H5F.open(h5_fn,'H5F_ACC_RDWR','H5P_DEFAULT');
@@ -175,6 +189,8 @@ end
 
 %how group
 g_id      = H5G.create(group_id, 'how', 0, 0, 0);
+H5Acreatedouble(g_id, 'NI', 32);
+H5Acreatedouble(g_id, 'scan_index', radar_struct.header.dataset_no);
 
 %% data group
 

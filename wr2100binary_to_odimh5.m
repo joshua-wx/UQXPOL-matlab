@@ -73,7 +73,11 @@ while true
         %push file to wr2100binary reader
         radar_struct = read_wr2100binary(fileList{i});
         %push out to odimh5
-        write_odimh5(radar_struct,output_path)
+        abort = write_odimh5(radar_struct,output_path);
+        if abort == 1
+            display('***processing aborted***')
+            return
+        end
     end
     
     %break while loop is kill file is not present

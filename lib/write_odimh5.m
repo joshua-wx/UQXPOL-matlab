@@ -1,4 +1,4 @@
-function write_odimh5(radar_struct,output_path)
+function abort = write_odimh5(radar_struct,output_path)
 %Joshua Soderholm, December 2015
 %Climate Research Group, University of Queensland
 
@@ -7,6 +7,7 @@ function write_odimh5(radar_struct,output_path)
 %read config
 temp_config_mat   = 'etc/current_config.mat';
 load(temp_config_mat);
+abort             = 0;
 
 %create h5 ffn
 if collate_volumes == 1 %collate into volumes using shared fn_datetime
@@ -15,7 +16,7 @@ else %keep as seperate scans using unique rec_utc_datetime
     postfix      = [datestr(radar_struct.header.rec_utc_datetime,'yyyymmdd_HHMMSS'),'_',num2str(radar_struct.header.dataset_no,'%02.0f')];
 end
 scan_type    = radar_struct.header.scan_type;
-h5_ffn       = [output_path,'/99_',postfix,'.h5'];
+h5_ffn       = [output_path,'/',num2str(radar_id,'%02.0f'),'_',postfix,'.h5'];
 g_name       = ['dataset',num2str(radar_struct.header.dataset_no)];
 
 %remove h5 filename if it exists
@@ -25,8 +26,9 @@ if exist(h5_ffn,'file')==2
     h5_datasets = {h5_info.Groups.Name};
     %if dataset exists, ask user what to do (required GUI)
     if any(strcmp(h5_datasets,['/',g_name]))
-        out = questdlg([g_name,' already exists in ',h5_ffn],'Dataset Exists in h5 File','Abort','Delete File');
+        out = questdlg([g_name,' already exists in ',h5_ffn],'Dataset Exists in h5 File','Abort','Delete File','Abort');
         if strcmp(out,'Abort')
+            abort = 1;
             return
         else
             %delete file
@@ -45,6 +47,10 @@ write_hdf_dataset(h5_ffn,radar_struct,g_name);
 
  
 function write_hdf_header(h5_fn,header_struct)
+
+%read config
+temp_config_mat   = 'etc/current_config.mat';
+load(temp_config_mat);
 
 %set object type
 scan_type = header_struct.scan_type;
@@ -68,15 +74,27 @@ group_id = H5G.create(root_id, 'what', 0, 0, 0);
 H5Acreatestring(group_id, 'date', datestr(header_struct.rec_utc_datetime,'yyyymmdd'));
 H5Acreatestring(group_id, 'time', datestr(header_struct.rec_utc_datetime,'HHMMSS'));
 H5Acreatestring(group_id, 'object', scan_object);
-H5Acreatestring(group_id, 'source', 'RAD:AU99,PLC:WOK'); %this makes it work with BOM odimh5 readers
+H5Acreatestring(group_id, 'source', ['RAD:AU',num2str(radar_id,'%02.0f'),',PLC:WOK']); %this makes it work with BOM odimh5 readers
 H5Acreatestring(group_id, 'version', 'H5rad 2.2');
 H5Acreatestring(group_id, 'FURUNO_radar_model','WR2100');
 
 %where root group
 group_id = H5G.create(root_id, 'where', 0, 0, 0);
-H5Acreatedouble(group_id, 'lat', header_struct.lat_dec);
-H5Acreatedouble(group_id, 'lon', header_struct.lon_dec);
-H5Acreatedouble(group_id, 'height', header_struct.ant_alt);
+if radar_lat == -999
+    H5Acreatedouble(group_id, 'lat', header_struct.lat_dec); %use data header
+else
+    H5Acreatedouble(group_id, 'lat', radar_lat); %use config
+end
+if radar_lat == -999
+    H5Acreatedouble(group_id, 'lon', header_struct.lon_dec); %use data header
+else
+    H5Acreatedouble(group_id, 'lon', radar_lon); %use config
+end
+if radar_lat == -999
+    H5Acreatedouble(group_id, 'height', header_struct.ant_alt); %use data header
+else
+    H5Acreatedouble(group_id, 'height', radar_h); %use config
+end
 
 %how root group
 group_id = H5G.create(root_id, 'how', 0, 0, 0);
@@ -113,6 +131,18 @@ H5Acreatedouble(group_id, 'FURUNO_tx_pulse_spec',header_struct.tx_pulse_spec); %
 H5F.close(file_id);
 
 function write_hdf_dataset(h5_fn,radar_struct,g_name)
+
+%read config
+temp_config_mat   = 'etc/current_config.mat';
+load(temp_config_mat);
+
+%wrap azimuth data using radar_heading
+if radar_heading ~= -999
+    data_azi = radar_struct.header.data_azi; %init
+    data_azi = data_azi + radar_heading;     %add heading
+    data_azi = wrapTo360(data_azi);          %wrap
+    radar_struct.header.data_azi = data_azi; %save
+end
 
 %set scan type
 scan_type = radar_struct.header.scan_type;

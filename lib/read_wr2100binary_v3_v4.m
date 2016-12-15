@@ -1,4 +1,4 @@
-function radar_struct=read_wr2100binary_v3(binary_ffn)
+function radar_struct=read_wr2100binary_v3_v4(binary_ffn)
 %Joshua Soderholm, December 2015
 %Climate Research Group, University of Queensland
 
@@ -69,15 +69,11 @@ tx_pulse_spec = fread(fid, 1, 'ushort'); %1-10
 
 %extract filename parts
 [~,temp_name,scan_type]  = fileparts(binary_ffn);
-scan_type = scan_type(2:end);
-if strcmp(scan_type,'scn')
-    scn_ppi_step  = str2num(temp_name(end-4:end-3)); %current ppi no in scn
-    scn_ppi_total = str2num(temp_name(end-1:end));   %total number of ppi in scn
-else
-    scn_ppi_step  = nan;
-    scn_ppi_total = nan;
-end
-
+scan_type   = scan_type(2:end); %remove dot from scan_type
+temp_parts  = textscan(temp_name,'%s','Delimiter','_'); temp_parts = temp_parts{1};%split up filename using _
+product_no  = str2num(temp_parts{1});  
+dataset_no  = str2num(temp_parts{4});    %scan number
+fn_datetime = datenum([temp_parts{2},temp_parts{3}],'yyyymmddHHMMSS'); %note, not UTC
 %create empty data matricies
 empty_vec = zeros(num_smpls,1);
 empty_mat = zeros(num_smpls,num_gates);
@@ -88,14 +84,14 @@ data_id  = empty_vec;
 data_azi = empty_vec;
 data_elv = empty_vec;
 
-radar_struct.data1  = struct('data',empty_mat,'quantity','RATE','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
-radar_struct.data2  = struct('data',empty_mat,'quantity','DBZH','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
-radar_struct.data3  = struct('data',empty_mat,'quantity','VRADH','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
-radar_struct.data4  = struct('data',empty_mat,'quantity','ZDR','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
-radar_struct.data5  = struct('data',empty_mat,'quantity','KDP','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
-radar_struct.data6  = struct('data',empty_mat,'quantity','PHIDP','offset',-360/65535,'gain',360/65535,'nodata',0,'undetect',0);
-radar_struct.data7 = struct('data',empty_mat,'quantity','RHOHV','offset',-2/65534,'gain',2/65534,'nodata',0,'undetect',0);
-radar_struct.data8 = struct('data',empty_mat,'quantity','WRADH','offset',-.01,'gain',.01,'nodata',0,'undetect',0);
+radar_struct.data1  = struct('data',empty_mat,'quantity','DBZH','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
+radar_struct.data2  = struct('data',empty_mat,'quantity','VRADH','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
+radar_struct.data3  = struct('data',empty_mat,'quantity','ZDR','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
+radar_struct.data4  = struct('data',empty_mat,'quantity','KDP','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
+radar_struct.data5  = struct('data',empty_mat,'quantity','PHIDP','offset',-360/65535,'gain',360/65535,'nodata',0,'undetect',0);
+radar_struct.data6 = struct('data',empty_mat,'quantity','RHOHV','offset',-2/65534,'gain',2/65534,'nodata',0,'undetect',0);
+radar_struct.data7 = struct('data',empty_mat,'quantity','WRADH','offset',-.01,'gain',.01,'nodata',0,'undetect',0);
+radar_struct.data8  = struct('data',empty_mat,'quantity','RATE','offset',-327.68,'gain',.01,'nodata',0,'undetect',0);
 radar_struct.data9 = struct('data',empty_mat,'quantity','FURUNO_QC','offset',0,'gain',1,'nodata',0,'undetect',0);
 
 %begin data read loop
@@ -157,14 +153,14 @@ for j=1:num_smpls
     data_id(j)                   = info_id;
     data_azi(j)                  = ray_azi;
     data_elv(j)                  = ray_elv;
-    radar_struct.data1.data(j,:) = ray_rain;
-    radar_struct.data2.data(j,:) = ray_zhh;
-    radar_struct.data3.data(j,:) = ray_vel;
-    radar_struct.data4.data(j,:) = ray_zdr;
-    radar_struct.data5.data(j,:) = ray_kdp;
-    radar_struct.data6.data(j,:) = ray_phidp;
-    radar_struct.data7.data(j,:) = ray_rhohv;
-    radar_struct.data8.data(j,:) = ray_specwidth;
+    radar_struct.data1.data(j,:) = ray_zhh;
+    radar_struct.data2.data(j,:) = ray_vel;
+    radar_struct.data3.data(j,:) = ray_zdr;
+    radar_struct.data4.data(j,:) = ray_kdp;
+    radar_struct.data5.data(j,:) = ray_phidp;
+    radar_struct.data6.data(j,:) = ray_rhohv;
+    radar_struct.data7.data(j,:) = ray_specwidth;
+    radar_struct.data8.data(j,:) = ray_rain;
     radar_struct.data9.data(j,:) = ray_qc;
     
 end
@@ -177,8 +173,8 @@ radar_struct.header = struct('file_vrsion',file_vrsion,...
     'prf1',prf1,'prf2',prf2,'puls_noise',puls_noise,'freq_noise',freq_noise,...
     'num_smpls',num_smpls,'num_gates',num_gates,'gate_res',gate_res,...
     'radar_horz_constant',radar_horz_constant,'radar_vert_constant',radar_vert_constant,...
-    'azi_offset',azi_offset,'scan_type',scan_type,'scn_ppi_step',scn_ppi_step,'scn_ppi_total',scn_ppi_total,...
-    'rec_utc_datetime',rec_utc_datetime,...
+    'azi_offset',azi_offset,'scan_type',scan_type,'dataset_no',dataset_no,...
+    'product_no',product_no,'rec_utc_datetime',rec_utc_datetime,'fn_datetime',fn_datetime,...
     'rec_item',rec_item,'tx_blind_rng',tx_blind_rng,'tx_pulse_spec',tx_pulse_spec,...
     'data_id',data_id,'data_azi',data_azi,'data_elv',data_elv);
 

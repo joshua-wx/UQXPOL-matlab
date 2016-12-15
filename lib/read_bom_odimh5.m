@@ -1,4 +1,4 @@
-function radar_struct=read_odimh5(input_path)
+function radar_struct=read_bom_odimh5(input_path)
 %Joshua Soderholm, December 2015
 %Climate Research Group, University of Queensland
 
@@ -19,25 +19,27 @@ if ~strcmp(ext,'.h5')
     display('input_path not a h5 file')
     return
 end
-%attempt to read header attribute
+%attempt to read furuno header attribute
 try
-    attval = h5readatt(input_path,'/what','FURUNO_radar_model');
+    attval = h5readatt(input_path,'/what','source');
 catch
-    display('failed to read /what/FURUNO_radar_model in odimh5 file')
+    display('failed to read /what/source in odimh5 file')
     return
 end
 %check attribute value
-if ~strcmp(deblank(attval),'WR2100')
-    display('not a furuno_wr2100 odimh5 file produced by this library')
+if ~strcmp(attval(1:6),'RAD:AU')
+    display('not a bom odimh5 file')
     return
 end
 
 %% read header
 
 %read from odimh5
-file_vrsion         = h5readatt(input_path,'/how','FURUNO_file_vrsion');
+rapic_azcorr        = h5readatt(input_path,'/how','rapic_AZCORR');
+rapic_elcorr        = h5readatt(input_path,'/how','rapic_ELCORR');
+lat_dec             = h5readatt(input_path,'/how','lat');
 
-lat_dec             = h5readatt(input_path,'/where','lat');
+
 lon_dec             = h5readatt(input_path,'/where','lon');    
 ant_alt             = h5readatt(input_path,'/where','height');
 
@@ -80,19 +82,27 @@ radar_struct.header = struct('file_vrsion',file_vrsion,...
     'data_id',data_id,'data_azi',data_azi,'data_elv',data_elv);
 
 %% read data
+%index datasets
+dataset_info = h5info(input_path,'/');
+num_dataset  = length(dataset_info.Groups)-3; %remove index for what/where/how groups
 
-data_info = h5info(input_path,'/dataset1/');
-num_data = length(data_info.Groups)-3; %remove index for what/where/how groups
+for i=1:num_dataset
+    %set dataset name
+    dataset_name = ['dataset',num2str(i)];
+    %index data groups
+    data_info = h5info(input_path,'/',dataset_name,'/');
+    num_data = length(data_info.Groups)-3; %remove index for what/where/how groups
 
-for i=1:num_data %loop through all data sets
-    %read data
-    data_name                   = ['data',num2str(i)];
-    data                        = h5read(input_path,['/dataset1/',data_name,'/data']);
-    quantity                    = deblank(h5readatt(input_path,['/dataset1/',data_name,'/what'],'quantity'));
-    offset                      = h5readatt(input_path,['/dataset1/',data_name,'/what'],'offset');
-    gain                        = h5readatt(input_path,['/dataset1/',data_name,'/what'],'gain');
-    nodata                      = h5readatt(input_path,['/dataset1/',data_name,'/what'],'nodata');
-    undetect                    = h5readatt(input_path,['/dataset1/',data_name,'/what'],'undetect');
-    %add to struct
-    radar_struct.(data_name)    = struct('data',data,'quantity',quantity,'offset',offset,'gain',gain,'nodata',nodata,'undetect',undetect);
+    for j=1:num_data %loop through all data sets
+        %read data
+        data_name                   = ['data',num2str(j)];
+        data                        = h5read(input_path,['/',dataset_name,'/',data_name,'/data']);
+        quantity                    = deblank(h5readatt(input_path,['/',dataset_name,'/',data_name,'/what'],'quantity'));
+        offset                      = h5readatt(input_path,['/',dataset_name,'/',data_name,'/what'],'offset');
+        gain                        = h5readatt(input_path,['/',dataset_name,'/',data_name,'/what'],'gain');
+        nodata                      = h5readatt(input_path,['/',dataset_name,'/',data_name,'/what'],'nodata');
+        undetect                    = h5readatt(input_path,['/',dataset_name,'/',data_name,'/what'],'undetect');
+        %add to struct
+        radar_struct.(dataset_name).(data_name) = struct('data',data,'quantity',quantity,'offset',offset,'gain',gain,'nodata',nodata,'undetect',undetect);
+    end
 end

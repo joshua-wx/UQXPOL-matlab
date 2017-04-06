@@ -71,8 +71,15 @@ tx_pulse_spec = fread(fid, 1, 'ushort'); %1-10
 [~,temp_name,scan_type]  = fileparts(binary_ffn);
 scan_type   = scan_type(2:end); %remove dot from scan_type
 temp_parts  = textscan(temp_name,'%s','Delimiter','_'); temp_parts = temp_parts{1};%split up filename using _
-product_no  = str2num(temp_parts{1});  
-dataset_no  = str2num(temp_parts{4});    %scan number
+product_no  = str2num(temp_parts{1});
+if strcmp(scan_type,'scn')  
+	dataset_no  = str2num(temp_parts{4});    %scan number
+elseif strcmp(scan_type,'rhi')  %RHI filenames start from dataset 0 in the filename, offset by 1
+	dataset_no  = str2num(temp_parts{4})+1;    %scan number
+else
+	disp('file type unknown')
+	return
+end
 fn_datetime = datenum([temp_parts{2},temp_parts{3}],'yyyymmddHHMMSS'); %note, not UTC
 %create empty data matricies
 empty_vec = zeros(num_smpls,1);

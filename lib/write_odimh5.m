@@ -1,4 +1,4 @@
-function [abort,h5_ffn] = write_odimh5(radar_struct,output_path,collate_volumes,radar_id,config_coords)
+function [abort,h5_ffn] = write_odimh5(radar_struct,output_path,collate_volumes,radar_id,config_coords,dataset_no_override)
 %Joshua Soderholm, December 2015
 %Climate Research Group, University of Queensland
 
@@ -13,7 +13,11 @@ else %keep as seperate scans using unique rec_utc_datetime
 end
 scan_type    = radar_struct.header.scan_type;
 h5_ffn       = [output_path,'/',num2str(radar_id,'%02.0f'),'_',postfix,'.h5'];
-g_name       = ['dataset',num2str(radar_struct.header.dataset_no)];
+if dataset_no_override == 0
+    g_name       = ['dataset',num2str(radar_struct.header.dataset_no)];
+else
+    g_name       = ['dataset',num2str(dataset_no_override)];
+end
 
 %remove h5 filename if it exists
 if exist(h5_ffn,'file')==2

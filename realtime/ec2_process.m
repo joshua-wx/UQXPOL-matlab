@@ -12,7 +12,7 @@ addpath('../lib')
 
 %read config file
 config_input_path =  '../etc/ec2_process.config';
-temp_config_mat   = '../etc/ec2_process.mat';
+temp_config_mat   = '../etc/ec2_process_config.mat';
 if exist(config_input_path,'file') == 2
     read_config(config_input_path,temp_config_mat);
     load(temp_config_mat);
@@ -56,13 +56,23 @@ while true
         cmd          = ['aws s3 cp --profile personal ',s3_ffn,' ',local_ffn];
         [status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
         
+        %skip remainder if file does not exist
+        if exist(local_ffn,'file') ~= 2
+            continue
+        end
+        
         %convert to odimh5 (delete local binary)
         radar_struct   = read_wr2100binary(local_ffn);
         config_coords  = struct('radar_lat',r_lat,'radar_lon',r_lon,'radar_h',r_alt,'radar_heading',r_azi);
-        [abort,h5_ffn] = write_odimh5(radar_struct,tmp_path,0,99,config_coords);
+        [abort,h5_ffn] = write_odimh5(radar_struct,tmp_path,0,99,config_coords,1);
         if abort == 1
             display('***processing aborted***')
             return
+        end
+        
+        %skip remainder if file does not exist
+        if exist(h5_ffn,'file') ~= 2
+            continue
         end
         
         keyboard

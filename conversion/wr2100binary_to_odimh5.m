@@ -74,7 +74,7 @@ while true
         radar_struct = read_wr2100binary(fileList{i});
         %push out to odimh5
         config_coords = struct('radar_lat',radar_lat,'radar_lon',radar_lon,'radar_h',radar_h,'radar_heading',radar_heading);
-        [abort,h5_ffn] = write_odimh5(radar_struct,output_path,collate_volumes,radar_id,config_coords);
+        [abort,h5_ffn] = write_odimh5(radar_struct,output_path,collate_volumes,radar_id,config_coords,0);
         if abort == 1
             display('***processing aborted***')
             return

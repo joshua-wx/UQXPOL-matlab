@@ -1,2 +1,4 @@
 data/
 *~
+*.stop
+*config.mat

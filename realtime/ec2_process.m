@@ -62,6 +62,7 @@ while true
         end
         
         %convert to odimh5 (delete local binary)
+        disp('converting to odimh5')
         radar_struct   = read_wr2100binary(local_ffn);
         config_coords  = struct('radar_lat',r_lat,'radar_lon',r_lon,'radar_h',r_alt,'radar_heading',r_azi);
         [abort,h5_ffn] = write_odimh5(radar_struct,tmp_path,0,99,config_coords,1);
@@ -75,13 +76,31 @@ while true
             continue
         end
         
-        keyboard
         %genenerate images using py-art script (delete odimh5)
+        disp('generating pyart images')
+        cmd = [python_path,' pyart_plot.py ',h5_ffn,' ',tmp_path];
+        [status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
         
         %transfer images back to s3 web/img
+        disp(['copying web images to s3'])
+        transfer_img_s3([tmp_path,'DBZH.png'],s3_webimg_path);
+        transfer_img_s3([tmp_path,'VRADH.png'],s3_webimg_path);
+        transfer_img_s3([tmp_path,'WRADH.png'],s3_webimg_path);
+        transfer_img_s3([tmp_path,'KDP.png'],s3_webimg_path);
+        transfer_img_s3([tmp_path,'ZDR.png'],s3_webimg_path);
+        transfer_img_s3([tmp_path,'RHOHV.png'],s3_webimg_path);
+        
+        %delete local files
+        delete(local_ffn)
+        delete(h5_ffn)
     end
     
     %pause for 5 seconds
     disp('pausing for 5 seconds')
     pause(5)
 end
+
+function transfer_img_s3(local_img_ffn,s3_webimg_path)
+%upload image ffn to s3 using mv and public read
+cmd             = ['aws s3 mv --profile personal --acl public-read ',local_img_ffn,' ',s3_webimg_path];
+[status,out]    = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);

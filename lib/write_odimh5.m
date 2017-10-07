@@ -1,12 +1,8 @@
-function abort = write_odimh5(radar_struct,output_path)
+function [abort,h5_ffn] = write_odimh5(radar_struct,output_path,collate_volumes,radar_id,config_coords)
 %Joshua Soderholm, December 2015
 %Climate Research Group, University of Queensland
 
 %WHAT: writes radar object in radar_struct to odminh5 compliant file
-
-%read config
-temp_config_mat   = 'etc/current_config.mat';
-load(temp_config_mat);
 abort             = 0;
 
 %create h5 ffn
@@ -34,23 +30,19 @@ if exist(h5_ffn,'file')==2
             %delete file
             delete(h5_ffn);
             %create new file
-            write_hdf_header(h5_ffn,radar_struct.header);
+            write_hdf_header(h5_ffn,radar_struct.header,radar_id,config_coords);
         end
     end
 else
     %create new file, does not exist
-    write_hdf_header(h5_ffn,radar_struct.header);
+    write_hdf_header(h5_ffn,radar_struct.header,radar_id,config_coords);
 end
 
 %write dataset
-write_hdf_dataset(h5_ffn,radar_struct,g_name);
+write_hdf_dataset(h5_ffn,radar_struct,g_name,config_coords);
 
  
-function write_hdf_header(h5_fn,header_struct)
-
-%read config
-temp_config_mat   = 'etc/current_config.mat';
-load(temp_config_mat);
+function write_hdf_header(h5_fn,header_struct,radar_id,config_coords)
 
 %set object type
 scan_type = header_struct.scan_type;
@@ -80,20 +72,20 @@ H5Acreatestring(group_id, 'FURUNO_radar_model','WR2100');
 
 %where root group
 group_id = H5G.create(root_id, 'where', 0, 0, 0);
-if radar_lat == -999
+if config_coords.radar_lat == -999
     H5Acreatedouble(group_id, 'lat', header_struct.lat_dec); %use data header
 else
-    H5Acreatedouble(group_id, 'lat', radar_lat); %use config
+    H5Acreatedouble(group_id, 'lat', config_coords.radar_lat); %use config
 end
-if radar_lat == -999
+if config_coords.radar_lon == -999
     H5Acreatedouble(group_id, 'lon', header_struct.lon_dec); %use data header
 else
-    H5Acreatedouble(group_id, 'lon', radar_lon); %use config
+    H5Acreatedouble(group_id, 'lon', config_coords.radar_lon); %use config
 end
-if radar_lat == -999
+if config_coords.radar_h == -999
     H5Acreatedouble(group_id, 'height', header_struct.ant_alt); %use data header
 else
-    H5Acreatedouble(group_id, 'height', radar_h); %use config
+    H5Acreatedouble(group_id, 'height', config_coords.radar_h); %use config
 end
 
 %how root group
@@ -130,16 +122,12 @@ H5Acreatedouble(group_id, 'FURUNO_tx_pulse_spec',header_struct.tx_pulse_spec); %
 %close file
 H5F.close(file_id);
 
-function write_hdf_dataset(h5_fn,radar_struct,g_name)
-
-%read config
-temp_config_mat   = 'etc/current_config.mat';
-load(temp_config_mat);
+function write_hdf_dataset(h5_fn,radar_struct,g_name,config_coords)
 
 %wrap azimuth data using radar_heading
-if radar_heading ~= -999
+if config_coords.radar_heading ~= -999
     data_azi = radar_struct.header.data_azi; %init
-    data_azi = data_azi + radar_heading;     %add heading
+    data_azi = data_azi + config_coords.radar_heading;     %add heading
     data_azi = wrapTo360(data_azi);          %wrap
     radar_struct.header.data_azi = data_azi; %save
 end

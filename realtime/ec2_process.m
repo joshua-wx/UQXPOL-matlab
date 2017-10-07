@@ -9,7 +9,6 @@ function ec2_process
 %add paths
 addpath('../etc')
 addpath('../lib')
-addpath('json_read')
 
 %read config file
 config_input_path =  '../etc/ec2_process.config';
@@ -25,7 +24,7 @@ end
 %temp download path
 tmp_path = [tempdir,'ec2_process_tmp/'];
 if exist(tmp_path) == 7
-    rmdir(tmp_path);
+    rmdir(tmp_path,'s');
 end
 mkdir(tmp_path);
 
@@ -51,19 +50,28 @@ while true
         r_alt  = C{5};
         
         %transfer from s3 to local
-        disp(['download ',s3_ffn,' from s3'])
+        disp(['copying ',s3_ffn,' from s3'])
         [~,fn,ext]   = fileparts(s3_ffn);
         local_ffn    = [tmp_path,fn,ext];
         cmd          = ['aws s3 cp --profile personal ',s3_ffn,' ',local_ffn];
         [status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
         
-        keyboard
         %convert to odimh5 (delete local binary)
+        radar_struct   = read_wr2100binary(local_ffn);
+        config_coords  = struct('radar_lat',r_lat,'radar_lon',r_lon,'radar_h',r_alt,'radar_heading',r_azi);
+        [abort,h5_ffn] = write_odimh5(radar_struct,tmp_path,0,99,config_coords);
+        if abort == 1
+            display('***processing aborted***')
+            return
+        end
         
+        keyboard
         %genenerate images using py-art script (delete odimh5)
         
         %transfer images back to s3 web/img
     end
-        
     
+    %pause for 5 seconds
+    disp('pausing for 5 seconds')
+    pause(5)
 end

@@ -1,4 +1,4 @@
-function dsp_upload
+function dsp_upload(config_input_path)
 
 %WHAT:
 %Listens for new files in local WR2100 DSP continaing new data files.
@@ -10,7 +10,6 @@ addpath('etc')
 addpath('lib')
 
 %read config file
-config_input_path =  'etc/dsp_upload.config';
 temp_config_mat   = 'etc/dsp_upload_config.mat';
 if exist(config_input_path,'file') == 2
     read_config(config_input_path,temp_config_mat);
@@ -20,13 +19,11 @@ else
     return
 end
 
-%location input
-if ask_location == 1
-    r_azi_str = inputdlg('Azimuth(deg): ');   r_azi = str2num(r_azi_str{1});
-    r_lat_str = inputdlg('Latitude(deg): ');  r_lat = str2num(r_lat_str{1});
-    r_lon_str = inputdlg('Longitude(deg): '); r_lon = str2num(r_lon_str{1});
-    r_alt_str = inputdlg('Elevation(m): ');   r_alt = str2num(r_alt_str{1});
-end
+%user vars
+r_azi_str = inputdlg('Azimuth(deg): ');   r_azi = str2num(r_azi_str{1});
+r_lat_str = inputdlg('Latitude(deg): ');  r_azi = str2num(r_lat_str{1});
+r_lon_str = inputdlg('Longitude(deg): '); r_ = str2num(r_lon_str{1});
+r_elv_str = inputdlg('Elevation(m): ');   r_elv = str2num(r_elv_str{1});
 
 %filter local path and add to upload list to ignore old files
 disp('Inital scan of input folder')
@@ -67,11 +64,9 @@ while true
         [status,out] = dos(cmd);
         upload_list  = [upload_list;local_fn];
         
-        %publish sns including s3 path, lat, lon, alt and azimuth
+        %publish sns
         disp(['sending sns for ',new_fn_list{i}])
-        sns_msg      = [s3_ffn,',',num2str(r_azi),',',num2str(r_lat),',',...
-            num2str(r_lon),',',num2str(r_alt)];
-        cmd          = ['aws sns publish --topic-arn ',sns_arn,' --message "',sns_msg,'"'];
+        cmd          = ['aws sns publish --topic-arn ',sns_arn,' --message "',s3_ffn,'"'];
         [status,out] = dos(cmd);
     end
     
@@ -107,7 +102,7 @@ for i = 1:length(fn_list)
     elseif strcmp(scan_type,'.rhi')  %RHI filenames start from dataset 0 in the filename, offset by 1
         tmp_index = str2num(tmp_parts{4});    %scan number
     else
-        %file type unknown
+        disp('file type unknown')
         continue
     end
     

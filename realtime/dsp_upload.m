@@ -63,7 +63,7 @@ while true
         
         %upload to s3
         disp(['uploading ',local_ffn,' to s3'])
-        cmd          = ['aws s3 cp ',local_fn,' ',s3_ffn];
+        cmd          = ['aws s3 cp ',local_ffn,' ',s3_ffn];
         [status,out] = dos(cmd);
         upload_list  = [upload_list;local_fn];
         

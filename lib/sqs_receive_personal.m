@@ -1,4 +1,4 @@
-function [message_out] = sqs_receive(sqs_url)
+function [message_out] = sqs_receive_personal(sqs_url)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Joshua Soderholm, Fugro ROAMES, 2017
@@ -14,12 +14,11 @@ message_out = {};
 
 while true
 	%init
-	temp_fn     = tempname;
-	cmd         = ['export LD_LIBRARY_PATH=/usr/lib; aws sqs receive-message --queue-url ',sqs_url,' --max-number-of-messages 10'];
-	[sout,eout] = unix([cmd,' | tee ',temp_fn]);
+	cmd         = ['export LD_LIBRARY_PATH=/usr/lib; aws sqs receive-message --profile personal --queue-url ',sqs_url,' --max-number-of-messages 10'];
+	[sout,eout] = unix(cmd);
 	%catch errors and convert out json to struct
 	if sout == 0 && ~isempty(eout)
-		jstruct = json_read(temp_fn);
+		jstruct = jsondecode(eout);
         %loop through messages
         for i=1:length(jstruct.Messages)
             %extract ith message body
@@ -31,7 +30,7 @@ while true
             %append
             message_out = [message_out,message];
             %delete message in background
-            cmd  = ['export LD_LIBRARY_PATH=/usr/lib; aws sqs delete-message --queue-url ',sqs_url,' --receipt-handle "',receipt_handle,'" &'];
+            cmd  = ['export LD_LIBRARY_PATH=/usr/lib; aws sqs delete-message --profile personal --queue-url ',sqs_url,' --receipt-handle "',receipt_handle,'" &'];
             [~,~] = unix([cmd,' >> tmp/log.sqs 2>&1 &']);
         end
 		%read out message data and receipt-handle
@@ -40,14 +39,7 @@ while true
 	elseif sout == 0 && isempty(eout)
 		%abort loop, sqs has no additional sns
 		break
-	else
-		%error
-		utility_log_write('tmp/log.sqs','',cmd,eout)
-	end
-	%clear temp_fn
-	if exist(temp_fn,'file')==2
-		delete(temp_fn)
-	end
+    end
 end
 
 

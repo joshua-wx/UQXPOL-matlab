@@ -6,12 +6,12 @@ function dsp_upload
 %tilt, upload to s3 and send sns to sqs queue
 
 %add paths
-addpath('etc')
-addpath('lib')
+addpath('../etc')
+addpath('../lib')
 
 %read config file
-config_input_path =  'etc/dsp_upload.config';
-temp_config_mat   = 'etc/dsp_upload_config.mat';
+config_input_path =  '..//etc/dsp_upload.config';
+temp_config_mat   = '../etc/dsp_upload_config.mat';
 if exist(config_input_path,'file') == 2
     read_config(config_input_path,temp_config_mat);
     load(temp_config_mat);

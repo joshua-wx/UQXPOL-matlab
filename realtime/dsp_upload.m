@@ -105,7 +105,7 @@ for i = 1:length(fn_list)
     out = strcmp(binary_fn,scanned_list);
     if any(out)
         continue
-    else	
+    end	
 
     %extract dataset number
     try

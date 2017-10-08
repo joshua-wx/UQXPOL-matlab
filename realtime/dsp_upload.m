@@ -34,7 +34,7 @@ scanned_list = filter_local(local_data_path,{},dataset_index);
 
 %start ec2
 disp('Starting EC2 Machine')
-cmd          = ['aws ec2 start-instances --instance-ids ',ec2_id];
+cmd          = ['aws ec2 --profile personal start-instances --instance-ids ',ec2_id];
 [status,out] = dos(cmd);
 
 %create kill file
@@ -63,7 +63,7 @@ while true
         
         %upload to s3
         disp(['uploading ',local_ffn,' to s3'])
-        cmd          = ['aws s3 cp ',local_ffn,' ',s3_ffn];
+        cmd          = ['aws s3 --profile personal cp ',local_ffn,' ',s3_ffn];
         [status,out] = dos(cmd);
         scanned_list  = [local_fn;scanned_list];
         
@@ -71,7 +71,7 @@ while true
         disp(['sending sns for ',new_fn_list{i}])
         sns_msg      = [s3_ffn,',',num2str(r_azi),',',num2str(r_lat),',',...
             num2str(r_lon),',',num2str(r_alt)];
-        cmd          = ['aws sns publish --topic-arn ',sns_arn,' --message "',sns_msg,'"'];
+        cmd          = ['aws sns --profile personal publish --topic-arn ',sns_arn,' --message "',sns_msg,'"'];
         [status,out] = dos(cmd);
     end
     
@@ -82,7 +82,7 @@ end
 
 %stop ec2 machine
 disp('Stopping EC2 Machine')
-cmd          = ['aws ec2 stop-instances --instance-ids ',ec2_id];
+cmd          = ['aws ec2 --profile personal stop-instances --instance-ids ',ec2_id];
 [status,out] = dos(cmd);
 
 function [new_fn_list,scanned_list] = filter_local(local_data_path,scanned_list,dataset_index)
@@ -98,7 +98,7 @@ listing = dir(local_data_path); listing(1:2) = [];
 fn_list = {listing.name};
 
 for i = 1:length(fn_list)
-    #target fn
+    %target fn
     binary_fn  = fn_list{i};
 
     %check if binary_ffn is in scanned_list
@@ -121,8 +121,6 @@ for i = 1:length(fn_list)
 		display(err)
 	end
 
-    #add to scanned list
+    %add to scanned list
     scanned_list  = [binary_fn;scanned_list];
-
 end
-

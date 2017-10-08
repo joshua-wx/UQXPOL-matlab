@@ -7,12 +7,14 @@ function ec2_process
 %NOTES: AWS commands configured for personal account
 
 %add paths
-addpath('../etc')
-addpath('../lib')
+if ~isdeployed
+    addpath('../etc')
+    addpath('../lib')
+end
 
-%read config file
-config_input_path =  '../etc/ec2_process.config';
-temp_config_mat   = '../etc/ec2_process_config.mat';
+%read config filesc
+config_input_path =  'ec2_process.config';
+temp_config_mat   =  'ec2_process_config.mat';
 if exist(config_input_path,'file') == 2
     read_config(config_input_path,temp_config_mat);
     load(temp_config_mat);
@@ -83,6 +85,11 @@ while true
 		    
 		    %genenerate images using py-art script (delete odimh5)
 		    disp('generating pyart images')
+            if isdeployed
+                python_path = deployed_python_path;
+            else
+                python_path = dev_python_path;
+            end
 		    cmd = [python_path,' pyart_plot.py ',h5_ffn,' ',tmp_path];
 		    [status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
 		    

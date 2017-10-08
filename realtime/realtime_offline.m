@@ -21,4 +21,8 @@ end
 
 %set html to be offline
 cmd          = ['aws s3 cp --profile personal --acl public-read ',pwd,'/html/index_offline.html ',s3_webindex_path];
-[status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
+if isunix
+    [status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
+else
+    [status,out] = dos(cmd);
+end

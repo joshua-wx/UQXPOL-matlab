@@ -1,0 +1,4 @@
+#! /bin/bash
+
+./run_ec2_process.sh /usr/local/MATLAB/MATLAB_Runtime/v91/
+

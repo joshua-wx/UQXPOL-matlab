@@ -2,3 +2,4 @@ data/
 *~
 *.stop
 *config.mat
+realtime/build/

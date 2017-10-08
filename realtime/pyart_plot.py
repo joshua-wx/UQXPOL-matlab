@@ -14,36 +14,41 @@
 
 #import libraries
 import sys
-sys.path.append('/home/meso/anaconda2/bin/python')
 import matplotlib as mpl
 mpl.use('Agg')
 from matplotlib import pyplot as plt
-from mpl_toolkits.basemap import Basemap
 import pyart
 import numpy as np
+import cartopy.io.img_tiles as cimgt
+import cartopy.crs as ccrs
 
 
 #field ranges
-dbz_min = 25
-dbz_max = 65
-vel_min = -20
-vel_max = 20
-spw_min = 0
-spw_max = 5
-zdr_min = -1
-zdr_max = 6
-kdp_min = -1
-kdp_max = 6
-cc_min  = 0
-cc_max  = 1
+dbz_min  = 25
+dbz_max  = 65
+dbz_cmap = 'pyart_NWSRef'
+vel_min  = -20
+vel_max  = 20
+vel_cmap = 'pyart_NWSVel'
+spw_min  = 0
+spw_max  = 5
+spw_cmap = 'Reds'
+zdr_min  = -1
+zdr_max  = 6
+zdr_cmap = 'jet'
+kdp_min  = -1
+kdp_max  = 6
+kdp_cmap = 'jet'
+cc_min   = 0
+cc_max   = 1
+cc_cmap  = 'jet'
 
 #assign args
 h5_ffn      = sys.argv[1]
 plt_folder  = sys.argv[2]
 
 #vars
-axis_sz     = [11.5, 9]
-basemap_res = 'h' #h
+axis_sz     = [12, 9]
 
 #read file
 radar = pyart.aux_io.read_odim_h5(h5_ffn, file_field_names=True)
@@ -73,29 +78,32 @@ gatefilter = pyart.correct.GateFilter(radar)
 gatefilter.exclude_below('DBZH',dbz_min)
 
 #call display
-display = pyart.graph.RadarMapDisplay(radar)
-
-#lat/lon lines
-lat_lines = np.arange(-29, -26, 0.2)
-lon_lines = np.arange(150, 155, 0.2)
-
+display = pyart.graph.RadarMapDisplayCartopy(radar)
 
 def plot_ppi(display,field,vmin,vmax,cmap,gatefilter):
     #generate figure
     fig = plt.figure(figsize=axis_sz)
+    ax  = plt.subplot(projection = ccrs.PlateCarree())
     #generate plot
-    display.plot_ppi_map(field, sweep=0,
-             vmin=vmin, vmax=vmax, cmap=cmap, resolution = basemap_res, gatefilter=gatefilter,
-             lat_lines = lat_lines, lon_lines=lon_lines)
+    display.plot_ppi_map(field, sweep=0, ax=ax,
+             vmin=vmin, vmax=vmax, cmap=cmap,
+	     gatefilter=gatefilter, resolution = '10m')
+
+    #Range Rings
+    display.plot_range_rings([10,20,30,40,50], ax=ax, col='0.5', ls='--', lw=1)
+    #OSM layers
+    request = cimgt.OSM()
+    ax.add_image(request, 9, zorder = 0)
     #output
     out_fn = plt_folder + field + '.png'
     plt.tight_layout()
     plt.savefig(out_fn, dpi=75)
-    
-plot_ppi(display,'DBZH',dbz_min,dbz_max,'pyart_NWSRef',gatefilter)
-plot_ppi(display,'VRADH',vel_min,vel_max,'pyart_BuDRd12',gatefilter)
-plot_ppi(display,'WRADH',spw_min,spw_max,'Reds',gatefilter)
-plot_ppi(display,'ZDR',zdr_min,zdr_max,'jet',gatefilter)
-plot_ppi(display,'KDP',kdp_min,kdp_max,'jet',gatefilter)
-plot_ppi(display,'RHOHV',cc_min,cc_max,'jet',gatefilter)
+
+
+plot_ppi(display,'DBZH',dbz_min,dbz_max,dbz_cmap,gatefilter)
+plot_ppi(display,'VRADH',vel_min,vel_max,vel_cmap,gatefilter)
+#plot_ppi(display,'WRADH',spw_min,spw_max,spw_cmap,gatefilter)
+plot_ppi(display,'ZDR',zdr_min,zdr_max,zdr_cmap,gatefilter)
+plot_ppi(display,'KDP',kdp_min,kdp_max,kdp_cmap,gatefilter)
+#plot_ppi(display,'RHOHV',cc_min,cc_max,cc_cmap,gatefilter)
 

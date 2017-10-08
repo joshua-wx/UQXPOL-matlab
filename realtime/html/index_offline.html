@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)https://s3.amazonaws.com/openradar/kamx_irma/index.html -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252"; http-equiv="refresh" content="5">
+<script>
+function startTime() {
+    var today = new Date();
+    var h = today.getHours();
+    var m = today.getMinutes();
+    var s = today.getSeconds();
+    m = checkTime(m);
+    s = checkTime(s);
+    document.getElementById('txt').innerHTML =
+    h + ":" + m + ":" + s;
+    var t = setTimeout(startTime, 500);
+}
+function checkTime(i) {
+    if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+    return i;
+}
+</script>
+</head>
+
+<body onload="startTime()">
+
+<h1>UQ-XPOL Realtime Radar Display</h1>
+
+<h2>Atmopsheric Observation Research Group</h2>
+
+<h1>***RADAR OFFLINE***</h1>
+
+<h3 id="txt"></h3>
+
+<p><img style='height: 100%; object-fit: contain' src="./img/DBZH.png"></p>
+
+<p><img style='height: 100%; object-fit: contain' src="./img/VRADH.png"></p>
+
+<p><img style='height: 100%; object-fit: contain' src="./img/ZDR.png"></p>
+
+<p><img style='height: 100%; object-fit: contain' src="./img/KDP.png"></p>
+
+</body></html>

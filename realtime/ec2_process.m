@@ -31,6 +31,10 @@ mkdir(tmp_path);
 %create kill file
 [status,out] = unix('touch process.stop');
 
+%set html to be online
+cmd          = ['aws s3 cp --profile personal --acl public-read ',pwd,'/html/index_online.html ',s3_webindex_path];
+[status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
+
 while true
     
     %check for kill file
@@ -104,6 +108,11 @@ while true
     disp('pausing for 5 seconds')
     pause(5)
 end
+
+%set html to be offline
+cmd          = ['aws s3 cp --profile personal --acl public-read ',pwd,'/html/index_offline.html ',s3_webindex_path];
+[status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
+
 
 function transfer_img_s3(local_img_ffn,s3_webimg_path)
 %upload image ffn to s3 using mv and public read

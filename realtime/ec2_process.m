@@ -41,58 +41,63 @@ while true
     %check sqs
     [message_out] = sqs_receive_personal(sqs_url);
     for i = 1:length(message_out)
-        %extract message parts
-        C = textscan(message_out{i},'%s %f %f %f %f','delimiter',',');
-        s3_ffn = C{1}{1};
-        r_azi  = C{2};
-        r_lat  = C{3};
-        r_lon  = C{4};
-        r_alt  = C{5};
-        
-        %transfer from s3 to local
-        disp(['copying ',s3_ffn,' from s3'])
-        [~,fn,ext]   = fileparts(s3_ffn);
-        local_ffn    = [tmp_path,fn,ext];
-        cmd          = ['aws s3 cp --profile personal ',s3_ffn,' ',local_ffn];
-        [status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
-        
-        %skip remainder if file does not exist
-        if exist(local_ffn,'file') ~= 2
-            continue
-        end
-        
-        %convert to odimh5 (delete local binary)
-        disp('converting to odimh5')
-        radar_struct   = read_wr2100binary(local_ffn);
-        config_coords  = struct('radar_lat',r_lat,'radar_lon',r_lon,'radar_h',r_alt,'radar_heading',r_azi);
-        [abort,h5_ffn] = write_odimh5(radar_struct,tmp_path,0,99,config_coords,1);
-        if abort == 1
-            display('***processing aborted***')
-            return
-        end
-        
-        %skip remainder if file does not exist
-        if exist(h5_ffn,'file') ~= 2
-            continue
-        end
-        
-        %genenerate images using py-art script (delete odimh5)
-        disp('generating pyart images')
-        cmd = [python_path,' pyart_plot.py ',h5_ffn,' ',tmp_path];
-        [status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
-        
-        %transfer images back to s3 web/img
-        disp(['copying web images to s3'])
-        transfer_img_s3([tmp_path,'DBZH.png'],s3_webimg_path);
-        transfer_img_s3([tmp_path,'VRADH.png'],s3_webimg_path);
-        transfer_img_s3([tmp_path,'WRADH.png'],s3_webimg_path);
-        transfer_img_s3([tmp_path,'KDP.png'],s3_webimg_path);
-        transfer_img_s3([tmp_path,'ZDR.png'],s3_webimg_path);
-        transfer_img_s3([tmp_path,'RHOHV.png'],s3_webimg_path);
-        
-        %delete local files
-        delete(local_ffn)
-        delete(h5_ffn)
+		try
+		    %extract message parts
+		    C = textscan(message_out{i},'%s %f %f %f %f','delimiter',',');
+		    s3_ffn = C{1}{1};
+		    r_azi  = C{2};
+		    r_lat  = C{3};
+		    r_lon  = C{4};
+		    r_alt  = C{5};
+		    
+		    %transfer from s3 to local
+		    disp(['copying ',s3_ffn,' from s3'])
+		    [~,fn,ext]   = fileparts(s3_ffn);
+		    local_ffn    = [tmp_path,fn,ext];
+		    cmd          = ['aws s3 cp --profile personal ',s3_ffn,' ',local_ffn];
+		    [status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
+		    
+		    %skip remainder if file does not exist
+		    if exist(local_ffn,'file') ~= 2
+		        continue
+		    end
+		    
+		    %convert to odimh5 (delete local binary)
+		    disp('converting to odimh5')
+		    radar_struct   = read_wr2100binary(local_ffn);
+		    config_coords  = struct('radar_lat',r_lat,'radar_lon',r_lon,'radar_h',r_alt,'radar_heading',r_azi);
+		    [abort,h5_ffn] = write_odimh5(radar_struct,tmp_path,0,99,config_coords,1);
+		    if abort == 1
+		        display('***processing aborted***')
+		        return
+		    end
+		    
+		    %skip remainder if file does not exist
+		    if exist(h5_ffn,'file') ~= 2
+		        continue
+		    end
+		    
+		    %genenerate images using py-art script (delete odimh5)
+		    disp('generating pyart images')
+		    cmd = [python_path,' pyart_plot.py ',h5_ffn,' ',tmp_path];
+		    [status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
+		    
+		    %transfer images back to s3 web/img
+		    disp(['copying web images to s3'])
+		    transfer_img_s3([tmp_path,'DBZH.png'],s3_webimg_path);
+		    transfer_img_s3([tmp_path,'VRADH.png'],s3_webimg_path);
+		    %transfer_img_s3([tmp_path,'WRADH.png'],s3_webimg_path);
+		    transfer_img_s3([tmp_path,'KDP.png'],s3_webimg_path);
+		    transfer_img_s3([tmp_path,'ZDR.png'],s3_webimg_path);
+		    %transfer_img_s3([tmp_path,'RHOHV.png'],s3_webimg_path);
+		    
+		    %delete local files
+		    delete(local_ffn)
+		    delete(h5_ffn)
+		catch err
+			display(err)
+			continue
+		end
     end
     
     %pause for 5 seconds

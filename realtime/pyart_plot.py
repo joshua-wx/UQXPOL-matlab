@@ -87,7 +87,7 @@ def plot_ppi(display,field,vmin,vmax,cmap,gatefilter):
     #generate plot
     display.plot_ppi_map(field, sweep=0, ax=ax,
              vmin=vmin, vmax=vmax, cmap=cmap,
-	     gatefilter=gatefilter, resolution = '10m')
+	     gatefilter=gatefilter, resolution = '10m',embelish=False)
 
     #Range Rings
     display.plot_range_rings([10,20,30,40,50], ax=ax, col='0.5', ls='--', lw=1)

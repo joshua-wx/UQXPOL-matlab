@@ -41,6 +41,10 @@ cmd          = ['aws ec2 --profile personal start-instances --instance-ids ',ec2
 cmd = 'copy NUL upload.stop';
 [status,out] = dos(cmd);
 
+%set html to be online
+cmd          = ['aws s3 cp --profile personal --acl public-read ',pwd,'/html/index_online.html ',s3_webindex_path];
+[status,out] = dos(cmd);
+
 while true
     
     %check for kill file
@@ -83,6 +87,10 @@ end
 %stop ec2 machine
 disp('Stopping EC2 Machine')
 cmd          = ['aws ec2 --profile personal stop-instances --instance-ids ',ec2_id];
+[status,out] = dos(cmd);
+
+%set html to be offline
+cmd          = ['aws s3 cp --profile personal --acl public-read ',pwd,'/html/index_offline.html ',s3_webindex_path];
 [status,out] = dos(cmd);
 
 function [new_fn_list,scanned_list] = filter_local(local_data_path,scanned_list,dataset_index)

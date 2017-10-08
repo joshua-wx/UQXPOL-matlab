@@ -20,11 +20,11 @@ copyfile('/home/meso/dev/uq-xpol/etc/ec2_process.config',pwd)
 
 display('tar')
 tar_fn = [build_path,'ec2_process.tar'];
-tar(tar_fn,{'run_ec2_process.sh','ec2_process','ec2_process.config','ec2_process_start','html'})
+tar(tar_fn,{'run_ec2_process.sh','ec2_process','ec2_process.config','ec2_process_start','pyart_plot.py','html'})
 
 display('scp')
 %ftp primary machine
-ec2_ip      = '13.55.116.61';
+ec2_ip      = '52.63.3.251';
 [sout,eout] = unix(['scp -i /home/meso/keys/joshuas_aws_personal_key.pem ', tar_fn ,' ubuntu@',ec2_ip,':~/ec2_process'])
 
 

@@ -21,11 +21,15 @@ else
 end
 
 %location input
-if ask_location == 1
+button = questdlg('Source of UQ-XPOL Location','Location','User Input','Preset Config','User Input');
+if strcmp(button,'User Input')
     r_azi_str = inputdlg('Azimuth(deg): ');   r_azi = str2num(r_azi_str{1});
     r_lat_str = inputdlg('Latitude(deg): ');  r_lat = str2num(r_lat_str{1});
     r_lon_str = inputdlg('Longitude(deg): '); r_lon = str2num(r_lon_str{1});
     r_alt_str = inputdlg('Elevation(m): ');   r_alt = str2num(r_alt_str{1});
+elseif strcmp(button,'') %no input
+	disp('Location input required, aborting')
+	return
 end
 
 %filter local path and add to upload list to ignore old files

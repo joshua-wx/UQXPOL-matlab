@@ -5,13 +5,19 @@ function dsp_upload
 %Filters by scan tilt. Once a new file has been detected of the correct
 %tilt, upload to s3 and send sns to sqs queue
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%load configs
+
 %add paths
 addpath('etc')
 addpath('../lib')
-
-%read config file
 config_input_path = 'dsp_upload.config';
 temp_config_mat   = 'dsp_upload_config.mat';
+location_mat      = 'last_location.mat';
+path_mat          = 'last_path.mat';
+tilt_mat          = 'last_tilt.mat';
+
+%read config file
 if exist(config_input_path,'file') == 2
     read_config(config_input_path,temp_config_mat);
     load(temp_config_mat);
@@ -21,16 +27,62 @@ else
 end
 
 %location input
-button = questdlg('Source of UQ-XPOL Location','Location','User Input','Preset Config','User Input');
-if strcmp(button,'User Input')
+if exist(location_mat,'file') == 2
+	load(location_mat);
+	loc_quest_out = questdlg(['Last Location Saved: ',datestr(r_dt)],'Location','Change','Use','Change');
+else
+	loc_quest_out = 'Change';
+end
+if strcmp(loc_quest_out,'Change')
     r_azi_str = inputdlg('Azimuth(deg): ');   r_azi = str2num(r_azi_str{1});
     r_lat_str = inputdlg('Latitude(deg): ');  r_lat = str2num(r_lat_str{1});
     r_lon_str = inputdlg('Longitude(deg): '); r_lon = str2num(r_lon_str{1});
     r_alt_str = inputdlg('Elevation(m): ');   r_alt = str2num(r_alt_str{1});
-elseif strcmp(button,'') %no input
+	r_dt      = now;
+	save(location_mat,'r_azi','r_lat','r_lon','r_alt','r_dt');
+elseif strcmp(loc_quest_out,'Use')
+	load(location_mat);
+else %no input
 	disp('Location input required, aborting')
 	return
 end
+
+%tilt input
+if exist(tilt_mat,'file') == 2
+	load(tilt_mat);
+	tilt_quest_out = questdlg(['Last tilt index: ',num2str(dataset_index)],'Tilt','Change','Use','Change');
+else
+	tilt_quest_out = 'Change';
+end
+if strcmp(tilt_quest_out,'Change')
+    dataset_index_str = inputdlg('Full Path to Local Data: '); dataset_index = str2num(dataset_index);
+	save(tilt_mat,'dataset_index');
+elseif strcmp(tilt_quest_out,'Use')
+	load(tilt_mat);
+else %no input
+	disp('Tilt input required, aborting')
+	return
+end
+
+
+%path input
+if exist(path_mat,'file') == 2
+	load(path_mat)
+	path_quest_out = questdlg(['Last path: ',local_data_path],'Path','Change','Use','Change');
+else
+	path_quest_out = 'Change';
+end
+if strcmp(path_quest_out,'Change')
+    local_data_path = inputdlg('Full Path to Local Data: ');
+	save(path_mat,'local_data_path');
+elseif strcmp(path_quest_out,'Use')
+	load(path_mat);
+else %no input
+	disp('Path input required, aborting')
+	return
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %filter local path and add to upload list to ignore old files
 disp('Inital scan of input folder')
@@ -107,7 +159,11 @@ new_fn_list = {};
 
 %list folders
 listing = dir(local_data_path); listing(1:2) = [];
-fn_list = {listing.name};
+if isempty(listing)
+	return
+else
+	fn_list = {listing.name};
+end
 
 for i = 1:length(fn_list)
     %target fn

@@ -8,9 +8,9 @@ function ec2_process
 
 %add paths
 if ~isdeployed
-    addpath('../etc')
     addpath('../lib')
 end
+addpath('etc')
 
 %read config filesc
 config_input_path =  'ec2_process.config';

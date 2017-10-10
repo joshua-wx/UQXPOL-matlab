@@ -6,15 +6,15 @@ function wr2100binary_to_odimh5(config_input_path)
 
 %testing config file
 if nargin==0
-    config_input_path =  '../etc/wr2100binary_to_odimh5.config';
+    config_input_path =  'etc/wr2100binary_to_odimh5.config';
 end
 
 %addpaths
-addpath('../etc')
+addpath('etc')
 addpath('../lib')
 
 %read config file
-temp_config_mat   = '../etc/current_config.mat';
+temp_config_mat   = 'etc/current_config.mat';
 if exist(config_input_path,'file') == 2
     read_config(config_input_path,temp_config_mat);
     load(temp_config_mat);

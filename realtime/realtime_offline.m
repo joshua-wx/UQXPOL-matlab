@@ -5,12 +5,12 @@ function realtime_offline
 %NOTES: AWS commands configured for personal account
 
 %add paths
-addpath('../etc')
+addpath('etc')
 addpath('../lib')
 
 %read config file
-config_input_path =  '../etc/ec2_process.config';
-temp_config_mat   = '../etc/ec2_process_config.mat';
+config_input_path =  'dsp_upload.config';
+temp_config_mat   = 'dsp_upload_config.mat';
 if exist(config_input_path,'file') == 2
     read_config(config_input_path,temp_config_mat);
     load(temp_config_mat);

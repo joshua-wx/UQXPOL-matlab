@@ -57,14 +57,14 @@ radar_horz_constant = h5readatt(input_path,'/how','radconstH');
 radar_vert_constant = h5readatt(input_path,'/how','radconstV');
 azi_offset          = h5readatt(input_path,'/how','FURUNO_azi_offset');
 scan_type           = deblank(h5readatt(input_path,'/how','FURUNO_scan_type'));
-scn_ppi_step        = h5readatt(input_path,'/how','FURUNO_scn_ppi_step');
-scn_ppi_total       = h5readatt(input_path,'/how','FURUNO_scn_ppi_total');
+%scn_ppi_step        = h5readatt(input_path,'/how','FURUNO_scn_ppi_step');
+%scn_ppi_total       = h5readatt(input_path,'/how','FURUNO_scn_ppi_total');
 rec_item            = h5readatt(input_path,'/how','FURUNO_rec_item');
 tx_blind_rng        = h5readatt(input_path,'/how','FURUNO_tx_blind_rng');
 tx_pulse_spec       = h5readatt(input_path,'/how','FURUNO_tx_pulse_spec');
-data_id             = h5readatt(input_path,'/how','FURUNO_data_id');
-data_azi            = h5readatt(input_path,'/how','FURUNO_data_azi');
-data_elv            = h5readatt(input_path,'/how','FURUNO_data_elv');
+%data_id             = h5readatt(input_path,'/how','FURUNO_data_id');
+%data_azi            = h5readatt(input_path,'/how','FURUNO_data_azi');
+%data_elv            = h5readatt(input_path,'/how','FURUNO_data_elv');
 
 
 %write to struct
@@ -74,14 +74,13 @@ radar_struct.header = struct('file_vrsion',file_vrsion,...
     'prf1',prf1,'prf2',prf2,'puls_noise',puls_noise,'freq_noise',freq_noise,...
     'num_smpls',num_smpls,'num_gates',num_gates,'gate_res',gate_res,...
     'radar_horz_constant',radar_horz_constant,'radar_vert_constant',radar_vert_constant,...
-    'azi_offset',azi_offset,'scan_type',scan_type,'scn_ppi_step',scn_ppi_step,'scn_ppi_total',scn_ppi_total,...
+    'azi_offset',azi_offset,'scan_type',scan_type,...
     'rec_utc_datetime',rec_utc_datetime,...
-    'rec_item',rec_item,'tx_blind_rng',tx_blind_rng,'tx_pulse_spec',tx_pulse_spec,...
-    'data_id',data_id,'data_azi',data_azi,'data_elv',data_elv);
+    'rec_item',rec_item,'tx_blind_rng',tx_blind_rng,'tx_pulse_spec',tx_pulse_spec);
 
 %% read data
 %index datasets
-dataset_info = h5info(input_path,'/');
+dataset_info = h5info([input_path,'/']);
 num_dataset  = length(dataset_info.Groups)-3; %remove index for what/where/how groups
 
 for i=1:num_dataset

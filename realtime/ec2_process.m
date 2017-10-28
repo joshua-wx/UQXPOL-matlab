@@ -90,14 +90,25 @@ while true
 		    [status,out] = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);
 		    
 		    %transfer images back to s3 web/img
-		    disp(['copying web images to s3'])
+		    disp(['copying web images to s3 web'])
 		    transfer_img_s3([tmp_path,'DBZH.png'],s3_webimg_path);
 		    transfer_img_s3([tmp_path,'VRADH.png'],s3_webimg_path);
-		    %transfer_img_s3([tmp_path,'WRADH.png'],s3_webimg_path);
 		    transfer_img_s3([tmp_path,'KDP.png'],s3_webimg_path);
 		    transfer_img_s3([tmp_path,'ZDR.png'],s3_webimg_path);
 		    %transfer_img_s3([tmp_path,'RHOHV.png'],s3_webimg_path);
-		    
+		    %transfer_img_s3([tmp_path,'WRADH.png'],s3_webimg_path);
+
+			%transfer images to s3 archive
+		    disp(['copying web images to s3 archive'])
+			file_dt_str   = datestr(radar_struct.rec_utc_datetime,'yyyymmdd_HHMMSS');
+			file_date_str = datestr(radar_struct.rec_utc_datetime,'yyyymmdd');
+		    transfer_img_s3([tmp_path,'DBZH.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_DBZH.png']);
+		    transfer_img_s3([tmp_path,'VRADH.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_VRADH.png']);
+		    transfer_img_s3([tmp_path,'KDP.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_KDP.png']);
+		    transfer_img_s3([tmp_path,'ZDR.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_ZDR.png']);
+		    %transfer_img_s3([tmp_path,'RHOHV.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_RHOHV.png']);
+		    %transfer_img_s3([tmp_path,'WRADH.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_WRADH.png']);
+
 		    %delete local files
 		    delete(local_ffn)
 		    delete(h5_ffn)
@@ -115,5 +126,5 @@ end
 
 function transfer_img_s3(local_img_ffn,s3_webimg_path)
 %upload image ffn to s3 using mv and public read
-cmd             = ['aws s3 mv --profile personal --acl public-read ',local_img_ffn,' ',s3_webimg_path];
+cmd             = ['aws s3 cp --profile personal --acl public-read ',local_img_ffn,' ',s3_webimg_path];
 [status,out]    = unix(['export LD_LIBRARY_PATH=/usr/lib; ',cmd]);

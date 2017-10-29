@@ -102,12 +102,12 @@ while true
 		    disp(['copying web images to s3 archive'])
 			file_dt_str   = datestr(radar_struct.header.rec_utc_datetime,'yyyymmdd_HHMMSS');
 			file_date_str = datestr(radar_struct.header.rec_utc_datetime,'yyyymmdd');
-		    transfer_img_s3([tmp_path,'DBZH.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_DBZH.png']);
-		    transfer_img_s3([tmp_path,'VRADH.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_VRADH.png']);
-		    transfer_img_s3([tmp_path,'KDP.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_KDP.png']);
-		    transfer_img_s3([tmp_path,'ZDR.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_ZDR.png']);
-		    %transfer_img_s3([tmp_path,'RHOHV.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_RHOHV.png']);
-		    %transfer_img_s3([tmp_path,'WRADH.png'],[s3_webarchive_path,file_date_str,'/',file_date_str,'_WRADH.png']);
+		    transfer_img_s3([tmp_path,'DBZH.png'],[s3_webarchive_path,file_date_str,'/',file_dt_str,'_DBZH.png']);
+		    transfer_img_s3([tmp_path,'VRADH.png'],[s3_webarchive_path,file_date_str,'/',file_dt_str,'_VRADH.png']);
+		    transfer_img_s3([tmp_path,'KDP.png'],[s3_webarchive_path,file_date_str,'/',file_dt_str,'_KDP.png']);
+		    transfer_img_s3([tmp_path,'ZDR.png'],[s3_webarchive_path,file_date_str,'/',file_dt_str,'_ZDR.png']);
+		    %transfer_img_s3([tmp_path,'RHOHV.png'],[s3_webarchive_path,file_date_str,'/',file_dt_str,'_RHOHV.png']);
+		    %transfer_img_s3([tmp_path,'WRADH.png'],[s3_webarchive_path,file_date_str,'/',file_dt_str,'_WRADH.png']);
 
 		    %delete local files
 		    delete(local_ffn)

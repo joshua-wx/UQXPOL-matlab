@@ -33,6 +33,11 @@ mkdir(tmp_path);
 %create kill file
 [status,out] = unix('touch process.stop');
 
+%notify
+run_time   = tic;
+last_hour  = 0;
+utility_pushover('ec2_process',['runtime: ',num2str(last_hour),' hrs']);
+
 while true
     
     %check for kill file
@@ -121,6 +126,13 @@ while true
     %pause for 5 seconds
     disp('pausing for 5 seconds')
     pause(5)
+    
+    %notify
+    current_hour = floor(toc(run_time)/60/60);
+    if current_hour > last_hour
+        last_hour = current_hour;
+        utility_pushover('ec2_process',['runtime: ',num2str(last_hour),' hrs']);
+    end
 end
 
 

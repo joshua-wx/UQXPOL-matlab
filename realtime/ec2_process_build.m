@@ -21,5 +21,5 @@ tar(tar_fn,{'run_ec2_process.sh','ec2_process','etc','ec2_process_start','pyart_
 
 display('scp')
 %ftp primary machine
-ec2_ip      = '54.66.152.104';
+ec2_ip      = '13.210.207.207';
 [sout,eout] = unix(['scp -i /home/meso/keys/joshuas_aws_personal_key.pem ', tar_fn ,' ubuntu@',ec2_ip,':~/ec2_process'])

@@ -12,7 +12,7 @@ else %keep as seperate scans using unique rec_utc_datetime
     postfix      = [datestr(radar_struct.header.rec_utc_datetime,'yyyymmdd_HHMMSS'),'_',num2str(radar_struct.header.dataset_no,'%02.0f')];
 end
 scan_type    = radar_struct.header.scan_type;
-h5_ffn       = [output_path,'/',num2str(radar_id,'%02.0f'),'_',postfix,'.h5'];
+h5_ffn       = [output_path,'/',num2str(radar_id,'%02.0f'),'_',postfix,'.',scan_type,'.h5'];
 if dataset_no_override == 0
     g_name       = ['dataset',num2str(radar_struct.header.dataset_no)];
 else
@@ -201,12 +201,14 @@ else %RHI where group
     az_angle = radar_struct.header.data_azi(1); %azi
     angles   = radar_struct.header.data_elv; %elv
     range    = (nbins-1)*rscale/1000;
+    rstart  = 0;
     
-    H5Acreatedouble(group_id, 'lat', radar_struct.header.lat_dec);
-    H5Acreatedouble(group_id, 'lon', radar_struct.header.lon_dec);
     H5Acreatedouble(g_id, 'az_angle', az_angle);
     H5Acreatedoublearray(g_id, 'angles', angles,size(angles));
     H5Acreatedouble(g_id, 'range', range);
+    H5Acreatelong(g_id, 'nbins', int64(nbins));
+    H5Acreatedouble(g_id, 'rscale', rscale);
+    H5Acreatedouble(g_id, 'rstart', rstart);
 end
 
 %how group

@@ -78,6 +78,7 @@ elseif strcmp(scan_type,'rhi')  %RHI filenames start from dataset 0 in the filen
 	dataset_no  = str2num(temp_parts{4})+1;    %scan number
 else
 	disp('file type unknown')
+    radar_struct = [];
 	return
 end
 fn_datetime = datenum([temp_parts{2},temp_parts{3}],'yyyymmddHHMMSS'); %note, not UTC

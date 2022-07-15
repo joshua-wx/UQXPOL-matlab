@@ -46,11 +46,18 @@ end
 %create stop file for realtime processing (delete this stop file to halt
 %loop)
 if exist(kill_path,'file') == 2
-    delete(kill_path)
+    delete(kill_path);
 end
 if realtime_processing == 1
     [~,~] = system(['touch ',kill_path]);
 end
+
+%make output folder if requires
+if exist(output_path,'file') ~= 2
+    mkdir(output_path);
+end
+    
+
 
 %processing loop
 while true
@@ -72,6 +79,10 @@ while true
         display(['converting file ',fileList{i}])
         %push file to wr2100binary reader
         radar_struct = read_wr2100binary(fileList{i});
+        if isempty(radar_struct)
+            display(['skipping file', fileList{i}])
+            continue
+        end
         %push out to odimh5
         config_coords = struct('radar_lat',radar_lat,'radar_lon',radar_lon,'radar_h',radar_h,'radar_heading',radar_heading);
         [abort,h5_ffn] = write_odimh5(radar_struct,output_path,collate_volumes,radar_id,config_coords,0);
